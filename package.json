@@ -1,6 +1,6 @@
 {
 	"name": "clean-webpack-plugin",
-	"version": "0.1.1",
+	"version": "0.1.2",
   "author": "John Agan <johnagan@github.com>",
 	"description": "A webpack plugin to remove your build folder(s) before building",
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
-  "devDependencies": {
+  "dependencies": {
     "rimraf": "~2.3.2"
   }
 }
