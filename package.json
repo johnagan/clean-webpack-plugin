@@ -1,0 +1,24 @@
+{
+	"name": "clean-webpack-plugin",
+	"version": "0.1.0",
+  "author": "John Agan <johnagan@github.com>",
+	"description": "A webpack plugin to remove your build folder(s) before building",
+  "homepage": "https://github.com/johnagan/clean-webpack-plugin",
+  "licenses": "MIT",
+  "main": "index.js",
+  "keywords": [
+    "webpack",
+    "plugin",
+    "clean"
+  ],
+	"repository": {
+		"type": "git",
+		"url" : "https://github.com/johnagan/clean-webpack-plugin.git"
+	},
+  "bugs": {
+    "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
+  },
+  "devDependencies": {
+    "rimraf": "~2.3.2"
+  }
+}
