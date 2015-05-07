@@ -2,9 +2,9 @@ var rimraf = require('rimraf')
 var path = require('path');
 var join = path.join;
 
-function Plugin(paths) {
+function Plugin(paths, context) {
   // determine webpack root
-  this.context = path.dirname(module.parent.filename);
+  this.context = context || path.dirname(module.parent.filename);
 
   // allows for a single string entry
   if (typeof paths == 'string' || paths instanceof String){
