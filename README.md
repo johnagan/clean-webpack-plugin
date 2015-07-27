@@ -3,7 +3,7 @@ A webpack plugin to remove/clean your build folder(s) before building
 
 #### new Clean(paths, context)
 - **paths**: Array of paths *(example: ['dist', 'build'])*  
-- **context**: root path, by default uses path where located *webpack.config.js* 
+- **context**: (optional) root path. By default uses the path where ``webpack.config.js`` is located
 
 ## Example
 
