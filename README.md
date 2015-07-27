@@ -19,5 +19,6 @@ module.exports = {
 }
 ```
 
-## [MIT License](http://www.opensource.org/licenses/mit-license.php)
+## License
+http://www.opensource.org/licenses/mit-license.php
 
