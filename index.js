@@ -1,6 +1,6 @@
-var rimraf = require('rimraf')
+var rimraf = require('rimraf');
 var path = require('path');
-var join = path.join;
+var resolve = path.resolve;
 
 function Plugin(paths, context) {
   // determine webpack root
@@ -20,9 +20,9 @@ Plugin.prototype.apply = function(compiler) {
 
   // preform an rm -rf on each path
   self.paths.forEach(function(path){
-    var path = join(self.context, path);
+    path = resolve(self.context, path);
     rimraf.sync(path);
   });
-}
+};
 
 module.exports = Plugin;
