@@ -13,12 +13,11 @@ A webpack plugin to remove/clean your build folder(s) before building
 var Clean = require('clean-webpack-plugin');
 
 module.exports = {
-    plugins: [
-        new Clean(['dist', 'build'])
-    ]
+  plugins: [
+    new Clean(['dist', 'build'])
+  ]
 }
 ```
 
 ## License
 http://www.opensource.org/licenses/mit-license.php
-
