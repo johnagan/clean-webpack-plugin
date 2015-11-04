@@ -18,6 +18,10 @@ function Plugin(paths, context) {
 Plugin.prototype.apply = function(compiler) {
   var self = this;
 
+  // exit if no paths passed in
+  if(self.paths === void 0)
+    return
+
   // preform an rm -rf on each path
   self.paths.forEach(function(path){
     path = resolve(self.context, path);
