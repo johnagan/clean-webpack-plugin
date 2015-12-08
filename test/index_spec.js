@@ -1,11 +1,13 @@
+process.env.NODE_ENV = 'test';
+
 var CleanWebpackPlugin = require('../index');
 var expect = require('chai').expect;
-var mkdirSync = require('fs').mkdirSync;
+var fs = require('fs');
 var path = require('path');
 
 function createDir(directory) {
   try {
-    mkdirSync(directory);
+    fs.mkdirSync(directory);
   } catch (error) {
     if (error.code !== 'EEXIST') {
       throw new Error(error)
@@ -37,41 +39,41 @@ describe('clean-webpack-plugin', function() {
   });
 
   it('project root must be an absolute path', function() {
-    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], '../');
+    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], {root: '../'});
     result = cleanWebpackPlugin.apply();
 
     expect(result).to.equal('project root must be an absolute path');
   });
 
   it('project root is outside of project', function() {
-    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], '/test/dir');
+    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], {root: '/test/dir'});
     result = cleanWebpackPlugin.apply();
 
     expect(result).to.equal('project root is outside of project');
   });
 
   it('must be inside the project root', function() {
-    cleanWebpackPlugin = new CleanWebpackPlugin(['/fake/path'], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin(['/fake/path'], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('must be inside the project root');
 
     fakeRootDir = tempRootDir.slice(0, -2);
-    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], fakeRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], {root: fakeRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('must be inside the project root');
   });
 
   it('is equal to project root', function() {
-    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin([tempRootDir], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('is equal to project root');
   });
 
   it('would delete webpack', function() {
-    cleanWebpackPlugin = new CleanWebpackPlugin(['./test'], projectDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin(['./test'], {root: projectDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('would delete webpack');
@@ -79,7 +81,7 @@ describe('clean-webpack-plugin', function() {
 
   it('remove direct', function() {
     createDir(dirOne);
-    cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('removed');
@@ -87,7 +89,7 @@ describe('clean-webpack-plugin', function() {
 
   it('remove relative', function() {
     createDir(dirOne);
-    cleanWebpackPlugin = new CleanWebpackPlugin(['./_one'], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin(['./_one'], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('removed');
@@ -95,7 +97,7 @@ describe('clean-webpack-plugin', function() {
 
   it('remove absolute', function() {
     createDir(dirOne);
-    cleanWebpackPlugin = new CleanWebpackPlugin([dirOne], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin([dirOne], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('removed');
@@ -104,7 +106,7 @@ describe('clean-webpack-plugin', function() {
   it('remove multiple', function() {
     createDir(dirOne);
     createDir(dirTwo);
-    cleanWebpackPlugin = new CleanWebpackPlugin([dirOne, dirTwo], tempRootDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin([dirOne, dirTwo], {root: tempRootDir});
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('removed');
@@ -113,15 +115,31 @@ describe('clean-webpack-plugin', function() {
 
   it('remove string', function() {
     createDir(dirOne);
+    cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, {root: tempRootDir});
+    result = cleanWebpackPlugin.apply();
+
+    expect(result[0].output).to.equal('removed');
+  });
+
+  it('context backwards compatibility ', function() {
+    createDir(dirOne);
     cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, tempRootDir);
     result = cleanWebpackPlugin.apply();
 
     expect(result[0].output).to.equal('removed');
   });
 
+  it('options = {dry: true}', function() {
+    createDir(dirOne);
+    cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, {root: tempRootDir, dry: true});
+    result = cleanWebpackPlugin.apply();
+
+    fs.statSync(dirOne);
+    expect(result[0].output).to.equal('removed');
+  });
+
   after(function() {
-    console.log('Cleaning up test environment');
-    cleanWebpackPlugin = new CleanWebpackPlugin(tempRootDir, projectDir);
+    cleanWebpackPlugin = new CleanWebpackPlugin(tempRootDir, {root: projectDir});
     cleanWebpackPlugin.apply();
   });
 });

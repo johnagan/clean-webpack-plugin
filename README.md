@@ -9,11 +9,11 @@ npm i clean-webpack-plugin --save
 ## Example Webpack Config
 
 ``` javascript
-var Clean = require('clean-webpack-plugin');
+var CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   plugins: [
-    new Clean(['dist', 'build'])
+    new cleanWebpackPlugin(['dist', 'build'], { root: '/full/project/path', verbose: true, dry: false })
   ]
 }
 ```
@@ -21,10 +21,14 @@ module.exports = {
 
 ## Parameters
 
-#### new Clean(paths [, context])
+#### new CleanWebpackPlugin(paths [, {options}])
 
-* `paths` -  An array of string paths to clean
-* `context` - The path root. By default uses ``webpack.config.js`` as root (optional)
+* `paths` -  An [array] of string paths to clean
+* `options` - An {object} containing optional params. See below. (optional)
+#
+* `options.root`: The path root. Must be an absolute path. string. default: use ``webpack.config.js`` path location as root 
+* `options.verbose`: Write logs to console. boolean. default: true (recommended)
+* `options.dry`: Do not delete anything, good for testing. boolean. default: false
 
 
 ## License
