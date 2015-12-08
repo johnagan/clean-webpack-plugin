@@ -13,12 +13,21 @@
   ],
   "repository": {
     "type": "git",
-    "url" : "https://github.com/johnagan/clean-webpack-plugin.git"
+    "url": "https://github.com/johnagan/clean-webpack-plugin.git"
   },
   "bugs": {
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --recursive",
+    "test:watch": "npm run test -- --watch"
+
+  },
   "dependencies": {
-    "rimraf": "~2.3.2"
+    "rimraf": "~2.4.4"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
   }
 }
