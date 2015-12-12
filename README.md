@@ -24,7 +24,7 @@ module.exports = {
 #### new Clean(paths [, context])
 
 * `paths` -  An array of string paths to clean
-* `context` - The path root. By default uses ``webpack.config.js`` as root (optional)
+* `context` - The path root. By default uses the directory of ``webpack.config`` (optional)
 
 
 ## License
