@@ -1,6 +1,12 @@
 var rimraf = require('rimraf');
 var path = require('path');
 
+// added node .10
+// http://stackoverflow.com/questions/21698906/how-to-check-if-a-path-is-absolute-or-relative/30714706#30714706
+function isAbsolute(p) {
+  return path.normalize(p + '/') === path.normalize(path.resolve(p) + '/');
+}
+
 function Plugin(paths, options) {
 
   //backwards compatibility
@@ -47,7 +53,7 @@ Plugin.prototype.apply = function(compiler) {
     return 'nothing to clean';
   }
 
-  if (!path.isAbsolute(self.options.root)) {
+  if (!isAbsolute(self.options.root)) {
     self.options.verbose && console.warn(
       'clean-webpack-plugin: ' + self.options.root + ' project root must be an absolute path. Skipping all...');
     return 'project root must be an absolute path';
