@@ -1,6 +1,9 @@
 # Clean for webpack
 A webpack plugin to remove/clean your build folder(s) before building
 
+[![Build Status][travis-image]][travis-url]
+[![Coveralls Status][coveralls-image]][coveralls-url]
+
 ## Installation
 ```
 npm i clean-webpack-plugin --save
@@ -33,3 +36,9 @@ module.exports = {
 
 ## License
 http://www.opensource.org/licenses/mit-license.php
+
+[travis-url]: https://travis-ci.org/johnagan/clean-webpack-plugin
+[travis-image]: https://travis-ci.org/johnagan/clean-webpack-plugin.svg
+
+[coveralls-url]: https://coveralls.io/github/johnagan/clean-webpack-plugin
+[coveralls-image]: https://coveralls.io/repos/johnagan/clean-webpack-plugin/badge.svg

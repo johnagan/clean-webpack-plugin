@@ -19,15 +19,17 @@
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --recursive",
-    "test:watch": "npm run test -- --watch"
-
+    "test": "mocha --recursive ./test/*_spec.js",
+    "test:watch": "npm run test -- --watch",
+    "test-travis": "istanbul cover _mocha -- -R spec ./test/*_spec.js"
   },
   "dependencies": {
     "rimraf": "~2.4.4"
   },
   "devDependencies": {
     "chai": "^3.4.1",
+    "coveralls": "^2.11.6",
+    "istanbul": "^0.4.1",
     "mocha": "^2.3.4"
   }
 }
