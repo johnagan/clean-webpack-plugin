@@ -54,7 +54,7 @@ Plugin.prototype.apply = function(compiler) {
   }
 
   var projectDir = path.resolve(self.options.root);
-  var projectDirSplit = projectDir.split('/');
+  var projectDirSplit = projectDir.split(path.sep);
   var webpackDir = path.dirname(module.parent.filename);
 
   // This is not perfect.
@@ -68,7 +68,7 @@ Plugin.prototype.apply = function(compiler) {
   self.paths.forEach(function(rimrafPath) {
     rimrafPath = path.resolve(self.options.root, rimrafPath);
 
-    pathSplit = rimrafPath.split('/');
+    pathSplit = rimrafPath.split(path.sep);
     projectDirSplit.forEach((function(singleDir, index) {
       if (pathSplit[index] !== singleDir) {
         insideFailCheck = true;
