@@ -9,7 +9,8 @@
   "keywords": [
     "webpack",
     "plugin",
-    "clean"
+    "clean",
+    "node"
   ],
   "repository": {
     "type": "git",
