@@ -116,7 +116,7 @@ Plugin.prototype.apply = function(compiler) {
         rimraf.sync(rimrafPath);
       }
 
-      self.options.verbose && console.log('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
+      self.options.verbose && console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
       results.push({path: rimrafPath, output: 'removed'});
     }
   });
