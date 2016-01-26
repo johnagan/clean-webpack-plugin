@@ -4,7 +4,7 @@ var path = require('path');
 // added node .10
 // http://stackoverflow.com/questions/21698906/how-to-check-if-a-path-is-absolute-or-relative/30714706#30714706
 function isAbsolute(p) {
-  return path.normalize(p + '/') === path.normalize(path.resolve(p) + '/');
+  return path.normalize(p + path.sep) === path.normalize(path.resolve(p) + path.sep);
 }
 
 function Plugin(paths, options) {
