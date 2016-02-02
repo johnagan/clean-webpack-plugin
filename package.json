@@ -25,12 +25,13 @@
     "test-travis": "istanbul cover _mocha -- -R spec ./test/*_spec.js"
   },
   "dependencies": {
-    "rimraf": "~2.4.4"
+    "rimraf": "~2.5.1"
   },
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.6",
-    "istanbul": "^0.4.1",
-    "mocha": "^2.3.4"
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.2",
+    "rewire": "^2.5.1"
   }
 }
