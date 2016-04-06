@@ -53,12 +53,9 @@ function Plugin(paths, options) {
 Plugin.prototype.apply = function (compiler) {
   var _this = this;
   var results = [];
-  var insideFailCheck;
-  var pathSplit;
   var workingDir;
   var projectRootDir;
   var webpackDir;
-  var projectDirSplit;
 
   // exit if no paths passed in
   if (_this.paths === void 0) {
@@ -84,17 +81,6 @@ Plugin.prototype.apply = function (compiler) {
     webpackDir = upperCaseWindowsRoot(webpackDir);
   }
 
-  // This is not perfect.
-  projectDirSplit = projectRootDir.split(path.sep);
-  if ((projectRootDir !== workingDir.slice(0, projectRootDir.length)) &&
-    (projectRootDir.indexOf(workingDir) === -1)) {
-    _this.options.verbose &&
-    console.warn('clean-webpack-plugin: ' + _this.options.root +
-      ' project root is outside of project. Skipping all...');
-    results.push({ path: projectRootDir, output: 'project root is outside of project' });
-    return results;
-  }
-
   // preform an rm -rf on each path
   _this.paths.forEach(function (rimrafPath) {
     rimrafPath = path.resolve(_this.options.root, rimrafPath);
@@ -103,59 +89,42 @@ Plugin.prototype.apply = function (compiler) {
       rimrafPath = upperCaseWindowsRoot(rimrafPath);
     }
 
-    pathSplit = rimrafPath.split(path.sep);
-    projectDirSplit.forEach((function (singleDir, index) {
-      if (singleDir === '') {
-        return;
-      }
-
-      if (pathSplit[index] !== singleDir) {
-        insideFailCheck = true;
-      }
-    }));
-
-    if (insideFailCheck) {
-      _this.options.verbose &&
-      console.warn(
-        'clean-webpack-plugin: ' + rimrafPath + ' must be inside the project root. Skipping...');
+    // disallow deletion any directories outside of root path.
+    if (rimrafPath.indexOf(projectRootDir) < 0) {
+      console.warn('clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
       results.push({ path: rimrafPath, output: 'must be inside the project root' });
       return;
     }
 
-    // disallow deletion of project path and any directories outside of project path.
-    if (rimrafPath.indexOf(projectRootDir) === 0) {
-      if (rimrafPath === projectRootDir) {
-        _this.options.verbose &&
-        console.warn(
-          'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
-        results.push({ path: rimrafPath, output: 'is equal to project root' });
-        return;
-      }
-
-      if (rimrafPath === webpackDir) {
-        _this.options.verbose &&
-        console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
-        results.push({ path: rimrafPath, output: 'would delete webpack' });
-        return;
-      }
-
-      // If path is completely outside of the project. Should not be able to happen. Including as an extra fail-safe.
-      if (projectRootDir.indexOf(rimrafPath) !== -1 || rimrafPath === __dirname ||
-        rimrafPath === process.cwd()) {
-        _this.options.verbose &&
-        console.warn('clean-webpack-plugin: ' + rimrafPath + ' is unsafe to delete. Skipping...');
-        results.push({ path: rimrafPath, output: 'is unsafe to delete' });
-        return;
-      }
-
-      if (_this.options.dry !== true) {
-        rimraf.sync(rimrafPath);
-      }
-
+    if (rimrafPath === projectRootDir) {
       _this.options.verbose &&
-      console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
-      results.push({ path: rimrafPath, output: 'removed' });
+      console.warn(
+        'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
+      results.push({ path: rimrafPath, output: 'is equal to project root' });
+      return;
     }
+
+    if (rimrafPath === webpackDir) {
+      _this.options.verbose &&
+      console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
+      results.push({ path: rimrafPath, output: 'would delete webpack' });
+      return;
+    }
+
+    if (rimrafPath === __dirname || rimrafPath === process.cwd()) {
+      _this.options.verbose &&
+      console.log('clean-webpack-plugin: ' + rimrafPath + ' is working directory. Skipping...');
+      results.push({ path: rimrafPath, output: 'is working directory' });
+      return;
+    }
+
+    if (_this.options.dry !== true) {
+      rimraf.sync(rimrafPath);
+    }
+
+    _this.options.verbose &&
+    console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
+    results.push({ path: rimrafPath, output: 'removed' });
   });
 
   return results;
