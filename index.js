@@ -50,10 +50,11 @@ function Plugin(paths, options) {
   this.options = options;
 }
 
-Plugin.prototype.apply = function (compiler) {
+Plugin.prototype.apply = function () {
   var _this = this;
   var results = [];
   var workingDir;
+  var dirName;
   var projectRootDir;
   var webpackDir;
 
@@ -72,11 +73,13 @@ Plugin.prototype.apply = function (compiler) {
   }
 
   workingDir = process.cwd();
+  dirName = __dirname;
   projectRootDir = path.resolve(_this.options.root);
   webpackDir = path.dirname(module.parent.filename);
 
   if (os.platform() === 'win32') {
     workingDir = upperCaseWindowsRoot(workingDir);
+    dirName = upperCaseWindowsRoot(dirName);
     projectRootDir = upperCaseWindowsRoot(projectRootDir);
     webpackDir = upperCaseWindowsRoot(webpackDir);
   }
@@ -91,7 +94,8 @@ Plugin.prototype.apply = function (compiler) {
 
     // disallow deletion any directories outside of root path.
     if (rimrafPath.indexOf(projectRootDir) < 0) {
-      console.warn('clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
+      _this.options.verbose && console.warn(
+        'clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
       results.push({ path: rimrafPath, output: 'must be inside the project root' });
       return;
     }
@@ -111,7 +115,7 @@ Plugin.prototype.apply = function (compiler) {
       return;
     }
 
-    if (rimrafPath === __dirname || rimrafPath === process.cwd()) {
+    if (rimrafPath === dirName || rimrafPath === workingDir) {
       _this.options.verbose &&
       console.log('clean-webpack-plugin: ' + rimrafPath + ' is working directory. Skipping...');
       results.push({ path: rimrafPath, output: 'is working directory' });

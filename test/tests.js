@@ -99,14 +99,6 @@ var run = function (setup) {
       expect(result[0].output).to.equal('removed');
     });
 
-    it('remove direct', function () {
-      createDir(dirOne);
-      cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], { root: projectRoot });
-      result = cleanWebpackPlugin.apply();
-
-      expect(result[0].output).to.equal('removed');
-    });
-
     it('remove relative', function () {
       createDir(dirOne);
       cleanWebpackPlugin = new CleanWebpackPlugin(['./_one'], { root: projectRoot });
