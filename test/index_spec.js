@@ -8,21 +8,29 @@ var tests = require('./tests');
 describe('clean-webpack-plugin', function () {
   describe('native os', function () {
     this.CleanWebpackPlugin = CleanWebpackPlugin;
-    this.projectDir = path.resolve(process.cwd());
-    this.tempRootDir = path.resolve(process.cwd(), './test/_temp');
-    this.outsideProjectDir = path.resolve('/test/dir');
+
     this.filesystemRoot = path.resolve('/');
-    this.dirOne = path.resolve(this.tempRootDir, '_one');
-    this.dirTwo = path.resolve(this.tempRootDir, '_two');
+
+    // where project root is under the cwd
+    this.projectDir = path.resolve(process.cwd());
+    this.projectRoot = path.resolve(process.cwd(), 'test/project_root');
+    this.dirOne = path.resolve(this.projectRoot, '_one');
+    this.dirTwo = path.resolve(this.projectRoot, '_two');
+
+    // where root is outside the cwd
+    this.outsideProjectRoot = path.resolve(process.cwd(), 'test/outside_root');
+    this.dirThree = path.resolve(this.outsideProjectRoot, 'three');
+
     var _this = this;
     var cleanWebpackPlugin;
 
     before(function () {
-      tests.createDir(_this.tempRootDir);
+      tests.createDir(_this.projectRoot);
+      tests.createDir(_this.outsideProjectRoot);
     });
 
     after(function () {
-      cleanWebpackPlugin = new CleanWebpackPlugin(_this.tempRootDir, { root: _this.projectDir });
+      cleanWebpackPlugin = new CleanWebpackPlugin([_this.projectRoot, _this.outsideProjectRoot], { root: _this.projectDir });
       cleanWebpackPlugin.apply();
     });
 

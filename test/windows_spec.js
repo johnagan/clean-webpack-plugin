@@ -24,11 +24,12 @@ function convertToWin32Path(dir) {
 describe('windows emulation', function () {
   this.processCwdWin32 = convertToWin32Path(process.cwd());
   this.projectDir = convertToWin32Path(process.cwd());
-  this.tempRootDir = convertToWin32Path(path.resolve(process.cwd(), './test/_temp'));
-  this.outsideProjectDir = convertToWin32Path(path.resolve('/test/dir'));
+  this.projectRoot = convertToWin32Path(path.resolve(process.cwd(), './test/_temp'));
+  this.outsideProjectRoot = convertToWin32Path(path.resolve('/test/dir'));
   this.filesystemRoot = convertToWin32Path(path.resolve(('/')));
-  this.dirOne = path.win32.resolve(this.tempRootDir + path.win32.sep + '_one');
-  this.dirTwo = path.win32.resolve(this.tempRootDir + path.win32.sep + '_two');
+  this.dirOne = path.win32.resolve(this.projectRoot + path.win32.sep + '_one');
+  this.dirTwo = path.win32.resolve(this.projectRoot + path.win32.sep + '_two');
+  this.dirThree = path.win32.resolve(this.outsideProjectRoot + path.win32.sep + '_three');
   this.CleanWebpackPlugin = CleanWebpackPlugin;
   this.platform = 'win32';
   var _this = this;
