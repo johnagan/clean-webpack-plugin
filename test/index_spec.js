@@ -16,7 +16,10 @@ describe('clean-webpack-plugin', function () {
     this.projectRoot = path.resolve(process.cwd(), 'test/project_root');
     this.dirOne = path.resolve(this.projectRoot, '_one');
     this.dirTwo = path.resolve(this.projectRoot, '_two');
-
+    this.dirOneSubOne = path.resolve(this.projectRoot, '_one/_sub_one');
+    this.dirOneSubTwo = path.resolve(this.projectRoot, '_one/_sub_two');
+    this.dirTwoSubOne = path.resolve(this.projectRoot, '_two/_sub_one');
+    this.dirTwoSubTwo = path.resolve(this.projectRoot, '_two/_sub_two');
     // where root is outside the cwd
     this.outsideProjectRoot = path.resolve(process.cwd(), 'test/outside_root');
     this.dirThree = path.resolve(this.outsideProjectRoot, 'three');

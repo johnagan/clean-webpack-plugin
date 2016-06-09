@@ -35,6 +35,10 @@ var run = function (setup) {
     var filesystemRoot = _this.filesystemRoot;
     var dirOne = _this.dirOne;
     var dirTwo = _this.dirTwo;
+    var dirOneSubOne = _this.dirOneSubOne;
+    var dirOneSubTwo = _this.dirOneSubTwo;
+    var dirTwoSubOne = _this.dirTwoSubOne;
+    var dirTwoSubTwo = _this.dirTwoSubTwo;
     var dirThree = _this.dirThree;
     var platform = _this.platform || os.platform();
     var cleanWebpackPlugin;
@@ -164,6 +168,43 @@ var run = function (setup) {
       result = cleanWebpackPlugin.apply();
       expect(result[0].output).to.equal('removed');
     });
+
+    describe('exclude', function () {
+      it('one', function() {
+        createDir(dirOneSubOne);
+        cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], { root: projectRoot, exclude: [ '_sub_one' ] });
+        result = cleanWebpackPlugin.apply();
+        expect(result[0].output).to.equal('removed with exclusions (1)');
+      });
+
+      it('multiple files', function() {
+        createDir(dirOneSubTwo);
+        cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], { root: projectRoot, exclude: [ '_sub_one', '_sub_two' ] });
+        result = cleanWebpackPlugin.apply();
+        expect(result[0].output).to.equal('removed with exclusions (2)');
+      });
+
+      it('ignore non-existing', function() {
+        cleanWebpackPlugin = new CleanWebpackPlugin(['_one'], { root: projectRoot, exclude: [ '_sub_three' ] });
+        result = cleanWebpackPlugin.apply();
+        expect(result[0].output).to.equal('removed');
+      });
+
+      it('from multiple directories', function() {
+        createDir(dirOne);
+        createDir(dirTwo);
+        createDir(dirOneSubOne);
+        createDir(dirOneSubTwo);
+        createDir(dirTwoSubOne);
+        createDir(dirTwoSubTwo);
+        cleanWebpackPlugin = new CleanWebpackPlugin(['_one', '_two'], { root: projectRoot, exclude: [ '_sub_one' ] });
+        result = cleanWebpackPlugin.apply();
+        expect(result[0].output).to.equal('removed with exclusions (1)');
+        expect(result[1].output).to.equal('removed with exclusions (1)');
+      });
+    });
+
+
 
     if (platform === 'win32') {
       describe('windows only tests', function () {
