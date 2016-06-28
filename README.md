@@ -43,7 +43,7 @@ An [array] of string paths to clean
 {
   "root": "[location of webpack.config]", // An absolute path for the root.
   "verbose": true, // Write logs to console.
-  "dry": false, // Do not delete anything, good for testing.
+  "dry": false // Do not delete anything, good for testing.
 }
 ```
 
