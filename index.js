@@ -1,5 +1,6 @@
 'use strict';
 
+var fs = require('fs');
 var os = require('os');
 var path = require('path');
 var rimraf = require('rimraf');
@@ -122,13 +123,52 @@ Plugin.prototype.apply = function () {
       return;
     }
 
+    var childrenAfterExcluding = [];
+    var excludedChildren = [];
+
+    if(_this.options.exclude && _this.options.exclude.length) {
+      try {
+        var pathStat = fs.statSync(rimrafPath);
+        if (pathStat.isDirectory()) {
+          childrenAfterExcluding = fs.readdirSync(rimrafPath)
+              .filter(function (childFile) {
+                var include = _this.options.exclude.indexOf(childFile) < 0;
+                if (!include) {
+                  excludedChildren.push(childFile);
+                }
+                return include;
+              })
+              .map(function (file) {
+                var fullPath = path.join(rimrafPath, file);
+                if (os.platform() === 'win32') {
+                  fullPath = upperCaseWindowsRoot(fullPath);
+                }
+                return fullPath;
+              });
+        }
+      } catch (e) {
+        childrenAfterExcluding = [];
+      }
+    }
+
     if (_this.options.dry !== true) {
-      rimraf.sync(rimrafPath);
+      if (_this.options.exclude && excludedChildren.length) {
+        childrenAfterExcluding.forEach(function (child) {
+          rimraf.sync(child);
+        });
+      } else {
+        rimraf.sync(rimrafPath);
+      }
     }
 
     _this.options.verbose &&
     console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
-    results.push({ path: rimrafPath, output: 'removed' });
+    _this.options.verbose && excludedChildren.length &&
+    console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
+
+    excludedChildren.length ?
+        results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')'}) :
+        results.push({ path: rimrafPath, output: 'removed' });
   });
 
   return results;

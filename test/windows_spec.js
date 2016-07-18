@@ -29,6 +29,10 @@ describe('windows emulation', function () {
   this.filesystemRoot = convertToWin32Path(path.resolve(('/')));
   this.dirOne = path.win32.resolve(this.projectRoot + path.win32.sep + '_one');
   this.dirTwo = path.win32.resolve(this.projectRoot + path.win32.sep + '_two');
+  this.dirOneSubOne = path.win32.resolve(this.projectRoot + path.win32.sep + '_one/_sub_one');
+  this.dirOneSubTwo = path.win32.resolve(this.projectRoot + path.win32.sep + '_one/_sub_two');
+  this.dirTwoSubOne = path.win32.resolve(this.projectRoot + path.win32.sep + '_two/_sub_one');
+  this.dirTwoSubTwo = path.win32.resolve(this.projectRoot + path.win32.sep + '_two/_sub_two');
   this.dirThree = path.win32.resolve(this.outsideProjectRoot + path.win32.sep + '_three');
   this.CleanWebpackPlugin = CleanWebpackPlugin;
   this.platform = 'win32';
@@ -59,7 +63,14 @@ describe('windows emulation', function () {
         return true;
       },
       'fs.statSync': function () {
-        return true;
+        return {
+          isDirectory: function() {
+            return true;
+          }
+        }
+      },
+      'fs.readdirSync': function() {
+        return ['_sub_one', '_sub_two'];
       }
     });
   });
