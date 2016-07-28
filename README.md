@@ -44,7 +44,8 @@ An [array] of string paths to clean
 {
   "root": "[location of webpack.config]", // An absolute path for the root.
   "verbose": true, // Write logs to console.
-  "dry": false, // Do not delete anything, good for testing.
+  "dry": false, // Use boolean "true" to test/emulate delete. (will not remove files).
+                // (Default: "false", remove files)
   "exclude": ["files", "to", "ignore"] // Instead of removing whole path recursively,
                                        // remove all path's content with exclusion of provided immediate children.
                                        // Good for not removing shared files from build directories.
