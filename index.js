@@ -176,9 +176,14 @@ var clean = function () {
 
 Plugin.prototype.apply = function (compiler) {
     var _this = this;
-    compiler.plugin("compile", function (params) {
-        clean.bind(_this)();
-    });
+    if (compiler === undefined) {
+        return clean.call(_this);
+    }
+    else {
+        compiler.plugin("compile", function (params) {
+            clean.call(_this);
+        });
+    }
 };
 
 module.exports = Plugin;
