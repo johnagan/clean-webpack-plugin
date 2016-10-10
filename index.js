@@ -51,7 +51,7 @@ function Plugin(paths, options) {
   this.options = options;
 }
 
-var clean = function () {
+Plugin.prototype.apply = function () {
   var _this = this;
   var results = [];
   var workingDir;
@@ -175,18 +175,6 @@ var clean = function () {
   });
 
   return results;
-};
-
-Plugin.prototype.apply = function (compiler) {
-    var _this = this;
-    if (compiler === undefined) {
-        return clean.call(_this);
-    }
-    else {
-        compiler.plugin("compile", function (params) {
-            clean.call(_this);
-        });
-    }
 };
 
 module.exports = Plugin;
