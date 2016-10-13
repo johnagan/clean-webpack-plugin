@@ -180,9 +180,14 @@ Plugin.prototype.apply = function (compiler) {
         return clean.call(_this);
     }
     else {
-        compiler.plugin("compile", function (params) {
-            clean.call(_this);
-        });
+        if (_this.option.watch) {
+          compiler.plugin("compile", function (params) {
+              clean.call(_this);
+          });
+        }
+        else {
+          return clean.call(_this);
+        }
     }
 };
 
