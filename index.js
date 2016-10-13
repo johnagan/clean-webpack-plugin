@@ -146,6 +146,9 @@ var clean = function () {
                 return fullPath;
               });
         }
+        if (_this.options.exclude.indexOf('.') >= 0) {
+          excludedChildren.push('.');
+        }
       } catch (e) {
         childrenAfterExcluding = [];
       }
@@ -180,7 +183,7 @@ Plugin.prototype.apply = function (compiler) {
         return clean.call(_this);
     }
     else {
-        if (_this.option.watch) {
+        if (_this.options.watch) {
           compiler.plugin("compile", function (params) {
               clean.call(_this);
           });
