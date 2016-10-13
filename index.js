@@ -146,6 +146,9 @@ var clean = function () {
                 return fullPath;
               });
         }
+        if (_this.options.exclude.indexOf('.') >= 0) {
+          excludedChildren.push('.');
+        }
       } catch (e) {
         childrenAfterExcluding = [];
       }
