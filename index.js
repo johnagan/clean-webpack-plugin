@@ -164,11 +164,15 @@ Plugin.prototype.apply = function () {
       }
     }
 
+    this.applyPlugin('before-clean', rimrafPath);
+    
     _this.options.verbose &&
     console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
     _this.options.verbose && excludedChildren.length &&
     console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
-
+    
+    this.applyPlugin('after-clean', rimrafPath);
+    
     excludedChildren.length ?
         results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')'}) :
         results.push({ path: rimrafPath, output: 'removed' });
