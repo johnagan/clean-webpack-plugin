@@ -4,7 +4,7 @@
   "author": "John Agan <johnagan@gmail.com>",
   "description": "A webpack plugin to remove your build folder(s) before building",
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
-  "licenses": "MIT",
+  "license": "MIT",
   "main": "index.js",
   "keywords": [
     "webpack",
