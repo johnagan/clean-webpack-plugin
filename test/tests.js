@@ -5,6 +5,7 @@ var os = require('os');
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
+var Compiler = require('./Compiler');
 
 function createDir(directory) {
   try {
@@ -137,6 +138,43 @@ var run = function (setup) {
       expect(result[0].output).to.equal('removed');
     });
 
+    it('watched disabled by default', function () {
+      createDir(dirOne);
+      cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, { root: projectRoot });
+      var compiler = new Compiler;
+      var applyResult = cleanWebpackPlugin.apply(compiler);
+
+      expect(applyResult[0].output).to.equal('removed');
+
+      var compilationResult = compiler.runStep("compilation");
+      expect(compilationResult).to.equal.undefined;
+    });
+
+    it('options = { watch: true }', function () {
+      createDir(dirOne);
+      cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, { root: projectRoot, watch: true});
+      var compiler = new Compiler;
+      var applyResult = cleanWebpackPlugin.apply(compiler);
+
+      expect(applyResult[0].output).to.equal('removed');
+
+      createDir(dirOne);
+      var compilationResult = compiler.runStep("compilation");
+      expect(compilationResult[0].output).to.equal('removed');
+    });
+
+    it('options = { watch: true, cleanOnApply: false }', function () {
+      createDir(dirOne);
+      cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, { root: projectRoot, watch: true, cleanOnApply: false});
+      var compiler = new Compiler;
+      var applyResult = cleanWebpackPlugin.apply(compiler);
+
+      expect(applyResult).to.be.undefined;
+
+      var compilationResult = compiler.runStep("compilation");
+      expect(compilationResult[0].output).to.equal('removed');
+    });
+
     it('context backwards compatibility ', function () {
       createDir(dirOne);
       cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, projectRoot);
@@ -159,6 +197,18 @@ var run = function (setup) {
       result = cleanWebpackPlugin.apply();
 
       expect(result[0].output).to.equal('removed');
+    });
+
+    it('options = { watch: false, cleanOnApply: false }', function () {
+      cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, { root: projectRoot, watch: false, cleanOnApply: false});
+      var compiler = new Compiler;
+      var applyResult = cleanWebpackPlugin.apply(compiler);
+
+      expect(applyResult).to.be.undefined;
+
+      var compilationResult = compiler.runStep("compilation");
+      expect(compilationResult).to.be.undefined;
+      fs.statSync(dirOne);
     });
 
     it('filesystem root', function () {
@@ -203,7 +253,6 @@ var run = function (setup) {
         expect(result[1].output).to.equal('removed with exclusions (1)');
       });
     });
-
 
 
     if (platform === 'win32') {

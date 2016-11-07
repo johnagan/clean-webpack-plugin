@@ -20,7 +20,8 @@ module.exports = {
       root: '/full/project/path',
       verbose: true, 
       dry: false,
-      exclude: ['shared.js']
+      exclude: ['shared.js'],
+      watch: true
     })
   ]
 }
@@ -46,9 +47,11 @@ An [array] of string paths to clean
   "verbose": true, // Write logs to console.
   "dry": false, // Use boolean "true" to test/emulate delete. (will not remove files).
                 // (Default: "false", remove files)
-  "exclude": ["files", "to", "ignore"] // Instead of removing whole path recursively,
-                                       // remove all path's content with exclusion of provided immediate children.
-                                       // Good for not removing shared files from build directories.
+  "exclude": ["files", "to", "ignore"], // Instead of removing whole path recursively,
+                                        // remove all path's content with exclusion of provided immediate children.
+                                        // Good for not removing shared files from build directories.
+  "watch": false, // Remove files before each compilation (Default: "false")
+  "cleanOnApply": true // Run when plugin is added to (applied on) webpack instance (Default: "true")
 }
 ```
 
