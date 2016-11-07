@@ -38,6 +38,9 @@ function Plugin(paths, options) {
     options.dry = false;
   }
 
+  options.watch = !!options.watch;
+  options.cleanOnApply = (options.cleanOnApply === undefined ? true : !!options.cleanOnApply);
+
   // determine webpack root
   options.root = options.root || path.dirname(module.parent.filename);
 
@@ -51,7 +54,7 @@ function Plugin(paths, options) {
   this.options = options;
 }
 
-Plugin.prototype.apply = function () {
+var clean = function () {
   var _this = this;
   var results = [];
   var workingDir;
@@ -176,5 +179,20 @@ Plugin.prototype.apply = function () {
 
   return results;
 };
+
+Plugin.prototype.apply = function (compiler) {
+    var _this = this;
+
+    if(this.options.watch) {
+      compiler.plugin("compilation", function (params) {
+        return clean.call(_this);
+      });
+    }
+
+    if(this.options.cleanOnApply) {
+        return clean.call(_this);
+    }
+};
+
 
 module.exports = Plugin;
