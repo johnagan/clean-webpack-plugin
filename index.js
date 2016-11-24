@@ -66,7 +66,7 @@ Plugin.prototype.apply = function () {
   }
 
   if (!isAbsolute(_this.options.root)) {
-    _this.options.verbose && console.warn(
+    _this.options.verbose && console.log(
       'clean-webpack-plugin: ' + _this.options.root +
       ' project root must be an absolute path. Skipping all...');
     results.push({ path: _this.options.root, output: 'project root must be an absolute path' });
@@ -95,7 +95,7 @@ Plugin.prototype.apply = function () {
 
     // disallow deletion any directories outside of root path.
     if (rimrafPath.indexOf(projectRootDir) < 0) {
-      _this.options.verbose && console.warn(
+      _this.options.verbose && console.log(
         'clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
       results.push({ path: rimrafPath, output: 'must be inside the project root' });
       return;
@@ -103,7 +103,7 @@ Plugin.prototype.apply = function () {
 
     if (rimrafPath === projectRootDir) {
       _this.options.verbose &&
-      console.warn(
+      console.log(
         'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
       results.push({ path: rimrafPath, output: 'is equal to project root' });
       return;
@@ -111,7 +111,7 @@ Plugin.prototype.apply = function () {
 
     if (rimrafPath === webpackDir) {
       _this.options.verbose &&
-      console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
+      console.log('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
       results.push({ path: rimrafPath, output: 'would delete webpack' });
       return;
     }
@@ -165,9 +165,9 @@ Plugin.prototype.apply = function () {
     }
 
     _this.options.verbose &&
-    console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
+    console.log('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
     _this.options.verbose && excludedChildren.length &&
-    console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
+    console.log('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
 
     excludedChildren.length ?
         results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')'}) :
