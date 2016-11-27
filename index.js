@@ -17,7 +17,7 @@ function upperCaseWindowsRoot(dir) {
   return splitPath.join(path.sep);
 }
 
-function Plugin(paths, options) {
+function CleanWebpackPlugin(paths, options) {
   //backwards compatibility
   if (typeof options === 'string') {
     options = {
@@ -51,7 +51,7 @@ function Plugin(paths, options) {
   this.options = options;
 }
 
-Plugin.prototype.apply = function () {
+CleanWebpackPlugin.prototype.apply = function () {
   var _this = this;
   var results = [];
   var workingDir;
@@ -177,4 +177,4 @@ Plugin.prototype.apply = function () {
   return results;
 };
 
-module.exports = Plugin;
+module.exports = CleanWebpackPlugin;
