@@ -18,7 +18,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(['dist', 'build'], {
       root: '/full/project/path',
-      verbose: true, 
+      verbose: true,
       dry: false,
       exclude: ['shared.js']
     })
@@ -46,6 +46,7 @@ An [array] of string paths to clean
   "verbose": true, // Write logs to console.
   "dry": false, // Use boolean "true" to test/emulate delete. (will not remove files).
                 // (Default: "false", remove files)
+  "allowOutsideDeletions": false, // Use boolean "true" to allow deletions outside of the project root.
   "exclude": ["files", "to", "ignore"] // Instead of removing whole path recursively,
                                        // remove all path's content with exclusion of provided immediate children.
                                        // Good for not removing shared files from build directories.

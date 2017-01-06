@@ -80,6 +80,13 @@ var run = function (setup) {
       expect(result[0].output).to.equal('removed');
     });
 
+    it('remove outside of project root - override', function () {
+      cleanWebpackPlugin = new CleanWebpackPlugin([dirThree], { root: projectRoot, allowOutsideDeletions: true });
+      result = cleanWebpackPlugin.apply();
+
+      expect(result[0].output).to.equal('removed');
+    });
+
     it('is equal to project root', function () {
       cleanWebpackPlugin = new CleanWebpackPlugin([projectRoot], { root: projectRoot });
       result = cleanWebpackPlugin.apply();
