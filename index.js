@@ -33,6 +33,7 @@ function CleanWebpackPlugin(paths, options) {
       options.verbose = true;
     }
   }
+  options.allowExternal = options.allowExternal || false;
 
   if (options.dry === undefined) {
     options.dry = false;
@@ -94,7 +95,7 @@ CleanWebpackPlugin.prototype.apply = function () {
     }
 
     // disallow deletion any directories outside of root path.
-    if (rimrafPath.indexOf(projectRootDir) < 0) {
+    if (rimrafPath.indexOf(projectRootDir) < 0 && !_this.options.allowExternal) {
       _this.options.verbose && console.warn(
         'clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
       results.push({ path: rimrafPath, output: 'must be inside the project root' });
