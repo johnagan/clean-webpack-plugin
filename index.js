@@ -138,6 +138,7 @@ CleanWebpackPlugin.prototype.apply = function () {
                 _this.options.exclude.forEach(function(exclusionRule) {
                   if (childFile.match(exclusionRule)) {
                     include = false;
+                    return;
                   }
                 });
 
