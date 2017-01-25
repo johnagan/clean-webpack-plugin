@@ -133,7 +133,14 @@ CleanWebpackPlugin.prototype.apply = function () {
         if (pathStat.isDirectory()) {
           childrenAfterExcluding = fs.readdirSync(rimrafPath)
               .filter(function (childFile) {
-                var include = _this.options.exclude.indexOf(childFile) < 0;
+                var include = true;
+
+                _this.options.exclude.forEach(function(exclusionRule) {
+                  if (childFile.match(exclusionRule)) {
+                    include = false;
+                  }
+                });
+
                 if (!include) {
                   excludedChildren.push(childFile);
                 }

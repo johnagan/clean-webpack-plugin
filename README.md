@@ -20,7 +20,7 @@ module.exports = {
       root: '/full/project/path',
       verbose: true, 
       dry: false,
-      exclude: ['shared.js']
+      exclude: ['shared.js', /style_.+\.css/]
     })
   ]
 }
