@@ -17,7 +17,7 @@ function upperCaseWindowsRoot(dir) {
   return splitPath.join(path.sep);
 }
 
-function Plugin(paths, options) {
+function CleanWebpackPlugin(paths, options) {
   //backwards compatibility
   if (typeof options === 'string') {
     options = {
@@ -33,6 +33,7 @@ function Plugin(paths, options) {
       options.verbose = true;
     }
   }
+  options.allowExternal = options.allowExternal || false;
 
   if (options.dry === undefined) {
     options.dry = false;
@@ -94,7 +95,7 @@ var clean = function () {
     }
 
     // disallow deletion any directories outside of root path.
-    if (rimrafPath.indexOf(projectRootDir) < 0) {
+    if (rimrafPath.indexOf(projectRootDir) < 0 && !_this.options.allowExternal) {
       _this.options.verbose && console.warn(
         'clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
       results.push({ path: rimrafPath, output: 'must be inside the project root' });
@@ -177,7 +178,7 @@ var clean = function () {
   return results;
 };
 
-Plugin.prototype.apply = function (compiler) {
+CleanWebpackPlugin.prototype.apply = function (compiler) {
     var _this = this;
     if (compiler === undefined) {
         return clean.call(_this);
@@ -194,4 +195,4 @@ Plugin.prototype.apply = function (compiler) {
     }
 };
 
-module.exports = Plugin;
+module.exports = CleanWebpackPlugin;
