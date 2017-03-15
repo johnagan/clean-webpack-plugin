@@ -52,7 +52,7 @@ function CleanWebpackPlugin(paths, options) {
   this.options = options;
 }
 
-CleanWebpackPlugin.prototype.apply = function () {
+var clean = function () {
   var _this = this;
   var results = [];
   var workingDir;
@@ -176,6 +176,23 @@ CleanWebpackPlugin.prototype.apply = function () {
   });
 
   return results;
+};
+
+CleanWebpackPlugin.prototype.apply = function (compiler) {
+    var _this = this;
+    if (compiler === undefined) {
+        return clean.call(_this);
+    }
+    else {
+        if (_this.options.watch) {
+          compiler.plugin("compile", function (params) {
+              clean.call(_this);
+          });
+        }
+        else {
+          return clean.call(_this);
+        }
+    }
 };
 
 module.exports = CleanWebpackPlugin;
