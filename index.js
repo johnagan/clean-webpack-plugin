@@ -52,7 +52,7 @@ function CleanWebpackPlugin(paths, options) {
   this.options = options;
 }
 
-var clean = function () {
+var clean = function() {
   var _this = this;
   var results = [];
   var workingDir;
@@ -87,7 +87,7 @@ var clean = function () {
   }
 
   // preform an rm -rf on each path
-  _this.paths.forEach(function (rimrafPath) {
+  _this.paths.forEach(function(rimrafPath) {
     rimrafPath = path.resolve(_this.options.root, rimrafPath);
 
     if (os.platform() === 'win32') {
@@ -104,22 +104,22 @@ var clean = function () {
 
     if (rimrafPath === projectRootDir) {
       _this.options.verbose &&
-      console.warn(
-        'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
+        console.warn(
+          'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
       results.push({ path: rimrafPath, output: 'is equal to project root' });
       return;
     }
 
     if (rimrafPath === webpackDir) {
       _this.options.verbose &&
-      console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
+        console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
       results.push({ path: rimrafPath, output: 'would delete webpack' });
       return;
     }
 
     if (rimrafPath === dirName || rimrafPath === workingDir) {
       _this.options.verbose &&
-      console.log('clean-webpack-plugin: ' + rimrafPath + ' is working directory. Skipping...');
+        console.log('clean-webpack-plugin: ' + rimrafPath + ' is working directory. Skipping...');
       results.push({ path: rimrafPath, output: 'is working directory' });
       return;
     }
@@ -127,25 +127,25 @@ var clean = function () {
     var childrenAfterExcluding = [];
     var excludedChildren = [];
 
-    if(_this.options.exclude && _this.options.exclude.length) {
+    if (_this.options.exclude && _this.options.exclude.length) {
       try {
         var pathStat = fs.statSync(rimrafPath);
         if (pathStat.isDirectory()) {
           childrenAfterExcluding = fs.readdirSync(rimrafPath)
-              .filter(function (childFile) {
-                var include = _this.options.exclude.indexOf(childFile) < 0;
-                if (!include) {
-                  excludedChildren.push(childFile);
-                }
-                return include;
-              })
-              .map(function (file) {
-                var fullPath = path.join(rimrafPath, file);
-                if (os.platform() === 'win32') {
-                  fullPath = upperCaseWindowsRoot(fullPath);
-                }
-                return fullPath;
-              });
+            .filter(function(childFile) {
+              var include = _this.options.exclude.indexOf(childFile) < 0;
+              if (!include) {
+                excludedChildren.push(childFile);
+              }
+              return include;
+            })
+            .map(function(file) {
+              var fullPath = path.join(rimrafPath, file);
+              if (os.platform() === 'win32') {
+                fullPath = upperCaseWindowsRoot(fullPath);
+              }
+              return fullPath;
+            });
         }
         if (_this.options.exclude.indexOf('.') >= 0) {
           excludedChildren.push('.');
@@ -157,7 +157,7 @@ var clean = function () {
 
     if (_this.options.dry !== true) {
       if (_this.options.exclude && excludedChildren.length) {
-        childrenAfterExcluding.forEach(function (child) {
+        childrenAfterExcluding.forEach(function(child) {
           rimraf.sync(child);
         });
       } else {
@@ -166,33 +166,31 @@ var clean = function () {
     }
 
     _this.options.verbose &&
-    console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
+      console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
     _this.options.verbose && excludedChildren.length &&
-    console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
+      console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
 
     excludedChildren.length ?
-        results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')'}) :
-        results.push({ path: rimrafPath, output: 'removed' });
+      results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')' }) :
+      results.push({ path: rimrafPath, output: 'removed' });
   });
 
   return results;
 };
 
-CleanWebpackPlugin.prototype.apply = function (compiler) {
-    var _this = this;
-    if (compiler === undefined) {
-        return clean.call(_this);
+CleanWebpackPlugin.prototype.apply = function(compiler) {
+  var _this = this;
+  if (compiler === undefined) {
+    return clean.call(_this);
+  } else {
+    if (_this.options.watch) {
+      compiler.plugin("compile", function(params) {
+        clean.call(_this);
+      });
+    } else {
+      return clean.call(_this);
     }
-    else {
-        if (_this.options.watch) {
-          compiler.plugin("compile", function (params) {
-              clean.call(_this);
-          });
-        }
-        else {
-          return clean.call(_this);
-        }
-    }
+  }
 };
 
 module.exports = CleanWebpackPlugin;
