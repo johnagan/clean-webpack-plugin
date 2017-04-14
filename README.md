@@ -14,7 +14,12 @@ npm i clean-webpack-plugin --save-dev
 ```js
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-new CleanWebpackPlugin(paths [, {options}])
+// webpack config
+{
+  plugins: [
+    new CleanWebpackPlugin(paths [, {options}])
+  ]
+}
 ```
 
 ## Example Webpack Config
