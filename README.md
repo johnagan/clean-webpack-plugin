@@ -12,16 +12,16 @@ npm i clean-webpack-plugin --save-dev
 
 ## Usage
 ```js
-const Clean = require('clean-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-new Clean(paths [, {options}])
+new CleanWebpackPlugin(paths [, {options}])
 ```
 
 ## Example Webpack Config
 This is a modified version of [WebPack's Plugin documentation](https://webpack.js.org/concepts/plugins/) that includes the Clean Plugin.
 
 ```js
-const Clean = require('clean-webpack-plugin') //installed via npm
+const CleanWebpackPlugin = require('clean-webpack-plugin') //installed via npm
 const HtmlWebpackPlugin = require('html-webpack-plugin'); //installed via npm
 const webpack = require('webpack'); //to access built-in plugins
 const path = require('path');
@@ -56,7 +56,7 @@ const webpackConfig = {
     ]
   },
   plugins: [
-    new Clean(pathsToClean, cleanOptions),
+    new CleanWebpackPlugin(pathsToClean, cleanOptions),
     new webpack.optimize.UglifyJsPlugin(),
     new HtmlWebpackPlugin({template: './src/index.html'})
   ]
