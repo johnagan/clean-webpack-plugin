@@ -14,7 +14,12 @@ npm i clean-webpack-plugin --save-dev
 ```js
 const Clean = require('clean-webpack-plugin')
 
-new Clean(paths [, {options}])
+// webpack config
+{
+  plugins: [
+    new Clean(paths [, {options}])
+  ]
+}
 ```
 
 ## Example Webpack Config
@@ -66,7 +71,7 @@ const webpackConfig = {
 
 
 ### Paths (Required)
-An [array] of string paths to clean
+An [array] of string paths to clean or a single string path
 ```js
 [
   'dist',         // removes 'dist' folder

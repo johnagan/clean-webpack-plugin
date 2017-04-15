@@ -6,6 +6,9 @@
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
   "license": "MIT",
   "main": "index.js",
+  "engines": {
+    "node": ">=5.10"
+  },
   "keywords": [
     "webpack",
     "plugin",

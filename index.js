@@ -1,196 +1,176 @@
-'use strict';
+'use strict'
 
-var fs = require('fs');
-var os = require('os');
-var path = require('path');
-var rimraf = require('rimraf');
+const
+  fs = require('fs'),
+  os = require('os'),
+  path = require('path'),
+  rimraf = require('rimraf')
+
+
+class CleanWebPackPlugin {
+
+  /**
+   * Plugin Constructor
+   * 
+   * @param {Array|String} paths - A single path string or array of paths
+   * @param {Object} options - The plugin options to use when cleaning
+   */
+  constructor(paths, options) {
+    this.paths = paths
+
+    // backwards compatibility
+    if (typeof options === 'string')
+      options = { root: options }
+
+    // set class options
+    Object.assign(this, {}, options)
+
+    // allows for a single string entry
+    if (!Array.isArray(this.paths))
+      this.paths = [this.paths]
+
+    // initialize default options
+    this.dry = this.dry || false
+    this.isWin = os.platform() === 'win32'
+    this.allowExternal = this.allowExternal || false
+    this.root = this.root || path.dirname(module.parent.filename)
+    this.verbose = this.verbose || process.env.NODE_ENV !== 'test'
+  }
+
+
+  apply(compiler) {
+    if (compiler === undefined || !this.watch)
+      return this.clean()
+    else
+      return compiler.plugin("compile", params => this.clean())
+  }
+
+
+  clean() {
+
+    let
+      logs = [],
+      dirName = __dirname,
+      workingDir = process.cwd(),
+      projectRootDir = path.resolve(this.root),
+      webpackDir = path.dirname(module.parent.filename)
+
+    // log helper
+    let log = (path, msg) => {
+      logs.push({ path: path, output: msg })
+      if (this.verbose) console.warn(`clean-webpack-plugin: ${path} ${msg}`)
+      return logs
+    }
+
+    // exit if no paths passed in
+    if (this.paths === void 0)
+      return log(this.paths, 'nothing to clean')
+
+    // require absolute root
+    if (!isAbsolute(this.root))
+      return log(this.root, `project root must be an absolute path. Skipping all...`)
+
+    // adjust casing for Windows
+    if (os.platform() === 'win32') {
+      dirName = upperCaseWindowsRoot(dirName)
+      webpackDir = upperCaseWindowsRoot(webpackDir)
+      workingDir = upperCaseWindowsRoot(workingDir)
+      projectRootDir = upperCaseWindowsRoot(projectRootDir)
+    }
+
+    // preform an rm -rf on each path
+    this.paths.forEach(pathToDelete => {
+
+      let excludedChildren = []
+      let childrenAfterExcluding = []
+      pathToDelete = path.resolve(this.root, pathToDelete)
+
+      // adjust casing for Windows
+      if (os.platform() === 'win32')
+        pathToDelete = upperCaseWindowsRoot(pathToDelete)
+
+      // disallow deletion any directories outside of root path.
+      if (pathToDelete.indexOf(projectRootDir) < 0 && !this.allowExternal)
+        return log(pathToDelete, 'must be inside the project root')
+
+      // skip the project root
+      if (pathToDelete === projectRootDir)
+        return log(pathToDelete, 'is equal to project root')
+
+      // skip the webpack root
+      if (pathToDelete === webpackDir)
+        return log(pathToDelete, 'would delete webpack')
+
+      // skip the working directorty
+      if (pathToDelete === dirName || pathToDelete === workingDir)
+        return log(pathToDelete, 'is working directory')
+
+      // skip excluded children
+      if (this.exclude && this.exclude.length) {
+        // map a list of path names
+        let map = file => {
+          let fullPath = path.join(pathToDelete, file)
+          if (os.platform() === 'win32') fullPath = upperCaseWindowsRoot(fullPath)
+          return fullPath
+        }
+
+        // filter a list excluded paths
+        let filter = file => {
+          let exclude = this.exclude.indexOf(file) !== -1
+          if (exclude) excludedChildren.push(file)
+          return exclude
+        }
+
+        try {
+          let pathStat = fs.statSync(pathToDelete)
+          if (pathStat.isDirectory())
+            childrenAfterExcluding = fs.readdirSync(pathToDelete).filter(filter).map(map)
+
+          // look for current dir
+          if (this.exclude.indexOf('.') !== -1)
+            excludedChildren.push('.')
+        } catch (e) {
+          childrenAfterExcluding = []
+        }
+      }
+
+
+      // perform the delete unless it's a dry run
+      if (this.dry !== true) {
+        if (this.exclude && excludedChildren.length)
+          childrenAfterExcluding.forEach(rimraf.sync)
+        else
+          rimraf.sync(pathToDelete)
+      }
+
+      // summary
+      let summaryResult = 'removed'
+      if (excludedChildren.length)
+        summaryResult = `removed with exclusions (${excludedChildren.length})`
+
+      return log(pathToDelete, summaryResult)
+    })
+
+    return logs
+  }
+
+}
+
+
+/*--------------------------------------------------------*/
 
 // added node .10
 // http://stackoverflow.com/questions/21698906/how-to-check-if-a-path-is-absolute-or-relative/30714706#30714706
 function isAbsolute(dir) {
-  return path.normalize(dir + path.sep) === path.normalize(path.resolve(dir) + path.sep);
+  return path.normalize(dir + path.sep) === path.normalize(path.resolve(dir) + path.sep)
 }
 
 function upperCaseWindowsRoot(dir) {
-  var splitPath = dir.split(path.sep);
-  splitPath[0] = splitPath[0].toUpperCase();
-  return splitPath.join(path.sep);
+  var splitPath = dir.split(path.sep)
+  splitPath[0] = splitPath[0].toUpperCase()
+  return splitPath.join(path.sep)
 }
 
-function CleanWebpackPlugin(paths, options) {
-  //backwards compatibility
-  if (typeof options === 'string') {
-    options = {
-      root: options
-    }
-  }
 
-  options = options || {};
-  if (options.verbose === undefined) {
-    if (process.env.NODE_ENV === 'test') {
-      options.verbose = false;
-    } else {
-      options.verbose = true;
-    }
-  }
-  options.allowExternal = options.allowExternal || false;
 
-  if (options.dry === undefined) {
-    options.dry = false;
-  }
-
-  // determine webpack root
-  options.root = options.root || path.dirname(module.parent.filename);
-
-  // allows for a single string entry
-  if (typeof paths == 'string' || paths instanceof String) {
-    paths = [paths];
-  }
-
-  // store paths and options
-  this.paths = paths;
-  this.options = options;
-}
-
-var clean = function() {
-  var _this = this;
-  var results = [];
-  var workingDir;
-  var dirName;
-  var projectRootDir;
-  var webpackDir;
-
-  // exit if no paths passed in
-  if (_this.paths === void 0) {
-    results.push({ path: _this.paths, output: 'nothing to clean' });
-    return results;
-  }
-
-  if (!isAbsolute(_this.options.root)) {
-    _this.options.verbose && console.warn(
-      'clean-webpack-plugin: ' + _this.options.root +
-      ' project root must be an absolute path. Skipping all...');
-    results.push({ path: _this.options.root, output: 'project root must be an absolute path' });
-    return results;
-  }
-
-  workingDir = process.cwd();
-  dirName = __dirname;
-  projectRootDir = path.resolve(_this.options.root);
-  webpackDir = path.dirname(module.parent.filename);
-
-  if (os.platform() === 'win32') {
-    workingDir = upperCaseWindowsRoot(workingDir);
-    dirName = upperCaseWindowsRoot(dirName);
-    projectRootDir = upperCaseWindowsRoot(projectRootDir);
-    webpackDir = upperCaseWindowsRoot(webpackDir);
-  }
-
-  // preform an rm -rf on each path
-  _this.paths.forEach(function(rimrafPath) {
-    rimrafPath = path.resolve(_this.options.root, rimrafPath);
-
-    if (os.platform() === 'win32') {
-      rimrafPath = upperCaseWindowsRoot(rimrafPath);
-    }
-
-    // disallow deletion any directories outside of root path.
-    if (rimrafPath.indexOf(projectRootDir) < 0 && !_this.options.allowExternal) {
-      _this.options.verbose && console.warn(
-        'clean-webpack-plugin: ' + rimrafPath + ' is outside of the project root. Skipping...');
-      results.push({ path: rimrafPath, output: 'must be inside the project root' });
-      return;
-    }
-
-    if (rimrafPath === projectRootDir) {
-      _this.options.verbose &&
-        console.warn(
-          'clean-webpack-plugin: ' + rimrafPath + ' is equal to project root. Skipping...');
-      results.push({ path: rimrafPath, output: 'is equal to project root' });
-      return;
-    }
-
-    if (rimrafPath === webpackDir) {
-      _this.options.verbose &&
-        console.warn('clean-webpack-plugin: ' + rimrafPath + ' would delete webpack. Skipping...');
-      results.push({ path: rimrafPath, output: 'would delete webpack' });
-      return;
-    }
-
-    if (rimrafPath === dirName || rimrafPath === workingDir) {
-      _this.options.verbose &&
-        console.log('clean-webpack-plugin: ' + rimrafPath + ' is working directory. Skipping...');
-      results.push({ path: rimrafPath, output: 'is working directory' });
-      return;
-    }
-
-    var childrenAfterExcluding = [];
-    var excludedChildren = [];
-
-    if (_this.options.exclude && _this.options.exclude.length) {
-      try {
-        var pathStat = fs.statSync(rimrafPath);
-        if (pathStat.isDirectory()) {
-          childrenAfterExcluding = fs.readdirSync(rimrafPath)
-            .filter(function(childFile) {
-              var include = _this.options.exclude.indexOf(childFile) < 0;
-              if (!include) {
-                excludedChildren.push(childFile);
-              }
-              return include;
-            })
-            .map(function(file) {
-              var fullPath = path.join(rimrafPath, file);
-              if (os.platform() === 'win32') {
-                fullPath = upperCaseWindowsRoot(fullPath);
-              }
-              return fullPath;
-            });
-        }
-        if (_this.options.exclude.indexOf('.') >= 0) {
-          excludedChildren.push('.');
-        }
-      } catch (e) {
-        childrenAfterExcluding = [];
-      }
-    }
-
-    if (_this.options.dry !== true) {
-      if (_this.options.exclude && excludedChildren.length) {
-        childrenAfterExcluding.forEach(function(child) {
-          rimraf.sync(child);
-        });
-      } else {
-        rimraf.sync(rimrafPath);
-      }
-    }
-
-    _this.options.verbose &&
-      console.warn('clean-webpack-plugin: ' + rimrafPath + ' has been removed.');
-    _this.options.verbose && excludedChildren.length &&
-      console.warn('clean-webpack-plugin: ' + excludedChildren.length + ' file(s) excluded - ' + excludedChildren.join(', '));
-
-    excludedChildren.length ?
-      results.push({ path: rimrafPath, output: 'removed with exclusions (' + excludedChildren.length + ')' }) :
-      results.push({ path: rimrafPath, output: 'removed' });
-  });
-
-  return results;
-};
-
-CleanWebpackPlugin.prototype.apply = function(compiler) {
-  var _this = this;
-  if (compiler === undefined) {
-    return clean.call(_this);
-  } else {
-    if (_this.options.watch) {
-      compiler.plugin("compile", function(params) {
-        clean.call(_this);
-      });
-    } else {
-      return clean.call(_this);
-    }
-  }
-};
-
-module.exports = CleanWebpackPlugin;
+module.exports = CleanWebPackPlugin
