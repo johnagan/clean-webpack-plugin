@@ -88,28 +88,43 @@ class CleanWebPackPlugin {
 
 
   /**
+   * Delete a single file or folder
+   * 
+   * @param {String} target - The file or folder path to delete
+   */
+  deletePath(target) {
+    let deleted = false
+    let error = undefined
+    let isFolder = target.endsWith('/')
+    let fullPath = path.resolve(this.root, target)
+
+    this.log(`deleting ${target}`)
+    if (!this.dry) {
+      try {
+        if (isFolder) fs.rmdirSync(fullPath)
+        else fs.unlinkSync(fullPath)
+        deleted = true
+      } catch (e) {
+        error = e
+        this.log(`error deleting ${target} - ${e}`)
+      }
+    }
+
+    return { deleted, isFolder, fullPath, error }
+  }
+
+
+  /**
    * Cleans the paths provided
    * 
-   * @returns {Object} The match results
+   * @returns {Array} The delete results
    */
   clean() {
     let matches = this.getMatches()
-    let files = matches.filter(m => !m.endsWith('/'))
-    let folders = matches.filter(m => m.endsWith('/'))
+    let files = matches.filter(m => !m.endsWith('/')).map(deletePath)
+    let folders = matches.filter(m => m.endsWith('/')).map(deletePath)
 
-    // delete files
-    files.forEach(file => {
-      this.log(`deleting file ${file}`)
-      if (!this.dry) fs.unlinkSync(file)
-    })
-
-    // delete folders
-    folders.forEach(folder => {
-      this.log(`deleting folder ${folder}`)
-      if (!this.dry) fs.rmdirSync(folder)
-    })
-
-    return matches
+    return files.concat(folders)
   }
 
 
