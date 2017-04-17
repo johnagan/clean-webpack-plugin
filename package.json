@@ -1,6 +1,6 @@
 {
   "name": "clean-webpack-plugin",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "author": "John Agan <johnagan@gmail.com>",
   "description": "A webpack plugin to remove your build folder(s) before building",
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
@@ -23,12 +23,12 @@
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
   "scripts": {
-    "test": "mocha --recursive ./test/*_spec.js",
+    "test": "mocha",
     "test:watch": "npm run test -- --watch",
     "test-travis": "istanbul cover _mocha -- -R spec ./test/*_spec.js"
   },
   "dependencies": {
-    "rimraf": "~2.5.1"
+    "glob": "^7.1.1"
   },
   "devDependencies": {
     "chai": "^3.4.1",

@@ -2,9 +2,16 @@
 
 const
   fs = require('fs'),
-  os = require('os'),
   path = require('path'),
-  rimraf = require('rimraf')
+  glob = require('glob')
+
+
+const DEFAULTS = {
+  dry: false,
+  allowExternal: false,
+  verbose: !process.env.LOADED_MOCHA_OPTS,
+  root: path.dirname(module.parent.filename)
+}
 
 
 class CleanWebPackPlugin {
@@ -16,28 +23,101 @@ class CleanWebPackPlugin {
    * @param {Object} options - The plugin options to use when cleaning
    */
   constructor(paths, options) {
-    this.paths = paths
+    Object.assign(this, DEFAULTS, { paths }, options)
 
-    // backwards compatibility
-    if (typeof options === 'string')
-      options = { root: options }
+    // convert to an absolute root
+    if (!path.isAbsolute(this.root))
+      this.root = path.resolve(DEFAULTS.root, this.root)
 
-    // set class options
-    Object.assign(this, {}, options)
+    // legacy includes
+    if (!this.pattern && this.paths)
+      this.pattern = this.getPattern(this.paths) + '/**'
 
-    // allows for a single string entry
-    if (!Array.isArray(this.paths))
-      this.paths = [this.paths]
-
-    // initialize default options
-    this.dry = this.dry || false
-    this.isWin = os.platform() === 'win32'
-    this.allowExternal = this.allowExternal || false
-    this.root = this.root || path.dirname(module.parent.filename)
-    this.verbose = this.verbose || process.env.NODE_ENV !== 'test'
+    // legacy excludes
+    if (!this.ignore && this.exclude)
+      this.ignore = '**/' + this.getPattern(this.exclude) + '/**'
   }
 
 
+  /**
+   * Get a relative path from a target path
+   * 
+   * @param {String} target - A path string
+   * @returns {String} a relative path of the target from the root
+   */
+  getRelativePath(target) {
+    // support for relative paths
+    if (!path.isAbsolute(target))
+      target = path.join(this.root, target)
+
+    return path.relative(this.root, target)
+  }
+
+
+  /**
+   * Get a glob pattern from a target path or array of paths
+   * 
+   * @param {Array|String} paths - A single path string or array of paths
+   * @returns {String} a glob pattern based on the target
+   */
+  getPattern(target) {
+    if (!Array.isArray(target)) target = [target]
+    let paths = target.map(this.getRelativePath.bind(this)).join('|')
+    return `+(${paths})`
+  }
+
+
+  /**
+   * List file and directory matches
+   * 
+   * @returns {Object} The match results
+   */
+  getMatches() {
+    // nothing to do
+    if (!this.pattern) {
+      this.log("No pattern provided")
+      return []
+    }
+
+    return glob.sync(this.pattern, {
+      ignore: this.ignore,
+      cwd: this.root,
+      mark: true
+    })
+  }
+
+
+  /**
+   * Cleans the paths provided
+   * 
+   * @returns {Object} The match results
+   */
+  clean() {
+    let matches = this.getMatches()
+    let files = matches.filter(m => !m.endsWith('/'))
+    let folders = matches.filter(m => m.endsWith('/'))
+
+    // delete files
+    files.forEach(file => {
+      this.log(`deleting file ${file}`)
+      if (!this.dry) fs.unlinkSync(file)
+    })
+
+    // delete folders
+    folders.forEach(folder => {
+      this.log(`deleting folder ${folder}`)
+      if (!this.dry) fs.rmdirSync(folder)
+    })
+
+    return matches
+  }
+
+
+  /**
+   * WebPack's apply interface
+   * 
+   * @param {Object} compiler - The WebPack compiler
+   */
   apply(compiler) {
     if (compiler === undefined || !this.watch)
       return this.clean()
@@ -46,131 +126,15 @@ class CleanWebPackPlugin {
   }
 
 
-  clean() {
-
-    let
-      logs = [],
-      dirName = __dirname,
-      workingDir = process.cwd(),
-      projectRootDir = path.resolve(this.root),
-      webpackDir = path.dirname(module.parent.filename)
-
-    // log helper
-    let log = (path, msg) => {
-      logs.push({ path: path, output: msg })
-      if (this.verbose) console.warn(`clean-webpack-plugin: ${path} ${msg}`)
-      return logs
-    }
-
-    // exit if no paths passed in
-    if (this.paths === void 0)
-      return log(this.paths, 'nothing to clean')
-
-    // require absolute root
-    if (!isAbsolute(this.root))
-      return log(this.root, `project root must be an absolute path. Skipping all...`)
-
-    // adjust casing for Windows
-    if (os.platform() === 'win32') {
-      dirName = upperCaseWindowsRoot(dirName)
-      webpackDir = upperCaseWindowsRoot(webpackDir)
-      workingDir = upperCaseWindowsRoot(workingDir)
-      projectRootDir = upperCaseWindowsRoot(projectRootDir)
-    }
-
-    // preform an rm -rf on each path
-    this.paths.forEach(pathToDelete => {
-
-      let excludedChildren = []
-      let childrenAfterExcluding = []
-      pathToDelete = path.resolve(this.root, pathToDelete)
-
-      // adjust casing for Windows
-      if (os.platform() === 'win32')
-        pathToDelete = upperCaseWindowsRoot(pathToDelete)
-
-      // disallow deletion any directories outside of root path.
-      if (pathToDelete.indexOf(projectRootDir) < 0 && !this.allowExternal)
-        return log(pathToDelete, 'must be inside the project root')
-
-      // skip the project root
-      if (pathToDelete === projectRootDir)
-        return log(pathToDelete, 'is equal to project root')
-
-      // skip the webpack root
-      if (pathToDelete === webpackDir)
-        return log(pathToDelete, 'would delete webpack')
-
-      // skip the working directorty
-      if (pathToDelete === dirName || pathToDelete === workingDir)
-        return log(pathToDelete, 'is working directory')
-
-      // skip excluded children
-      if (this.exclude && this.exclude.length) {
-        // map a list of path names
-        let map = file => {
-          let fullPath = path.join(pathToDelete, file)
-          if (os.platform() === 'win32') fullPath = upperCaseWindowsRoot(fullPath)
-          return fullPath
-        }
-
-        // filter a list excluded paths
-        let filter = file => {
-          let exclude = this.exclude.indexOf(file) !== -1
-          if (exclude) excludedChildren.push(file)
-          return exclude
-        }
-
-        try {
-          let pathStat = fs.statSync(pathToDelete)
-          if (pathStat.isDirectory())
-            childrenAfterExcluding = fs.readdirSync(pathToDelete).filter(filter).map(map)
-
-          // look for current dir
-          if (this.exclude.indexOf('.') !== -1)
-            excludedChildren.push('.')
-        } catch (e) {
-          childrenAfterExcluding = []
-        }
-      }
-
-
-      // perform the delete unless it's a dry run
-      if (this.dry !== true) {
-        if (this.exclude && excludedChildren.length)
-          childrenAfterExcluding.forEach(rimraf.sync)
-        else
-          rimraf.sync(pathToDelete)
-      }
-
-      // summary
-      let summaryResult = 'removed'
-      if (excludedChildren.length)
-        summaryResult = `removed with exclusions (${excludedChildren.length})`
-
-      return log(pathToDelete, summaryResult)
-    })
-
-    return logs
+  /**
+   * Log messages to console
+   * 
+   * @param {String} message - The message to log to the console
+   */
+  log(message) {
+    if (this.verbose) console.warn(`[clean-webpack-plugin]: ${message}`)
   }
 
 }
-
-
-/*--------------------------------------------------------*/
-
-// added node .10
-// http://stackoverflow.com/questions/21698906/how-to-check-if-a-path-is-absolute-or-relative/30714706#30714706
-function isAbsolute(dir) {
-  return path.normalize(dir + path.sep) === path.normalize(path.resolve(dir) + path.sep)
-}
-
-function upperCaseWindowsRoot(dir) {
-  var splitPath = dir.split(path.sep)
-  splitPath[0] = splitPath[0].toUpperCase()
-  return splitPath.join(path.sep)
-}
-
-
 
 module.exports = CleanWebPackPlugin
