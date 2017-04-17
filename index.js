@@ -110,7 +110,7 @@ class CleanWebPackPlugin {
       }
     }
 
-    return { deleted, isFolder, path: path, fullPath, error }
+    return { deleted, isFolder, path: target, fullPath, error }
   }
 
 
