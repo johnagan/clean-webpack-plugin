@@ -32,7 +32,7 @@ const webpack = require('webpack'); //to access built-in plugins
 const path = require('path');
 
 // the path(s) that should be cleaned
-let pathsToClean [
+let pathsToClean = [
   'dist',
   'build'
 ]
