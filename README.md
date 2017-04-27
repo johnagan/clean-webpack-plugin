@@ -26,7 +26,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 This is a modified version of [WebPack's Plugin documentation](https://webpack.js.org/concepts/plugins/) that includes the Clean Plugin.
 
 ```js
-const CleanWebpackPlugin = require('clean-webpack-plugin') //installed via npm
+const CleanWebpackPlugin = require('clean-webpack-plugin'); //installed via npm
 const HtmlWebpackPlugin = require('html-webpack-plugin'); //installed via npm
 const webpack = require('webpack'); //to access built-in plugins
 const path = require('path');
