@@ -102,7 +102,11 @@ An [array] of string paths to clean
   // Instead of removing whole path recursively,
   // remove all path's content with exclusion of provided immediate children.
   // Good for not removing shared files from build directories.
-  exclude: [ 'files', 'to', 'ignore' ] 
+  exclude: [ 'files', 'to', 'ignore' ],
+
+  // allow the plugin to clean folders outside of the webpack root.
+  // Default: false - don't allow clean folder outside of the webpack root
+  allowExternal: false
 }
 ```
 
