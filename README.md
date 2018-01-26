@@ -107,6 +107,10 @@ An [array] of string paths to clean
   // allow the plugin to clean folders outside of the webpack root.
   // Default: false - don't allow clean folder outside of the webpack root
   allowExternal: false
+  
+  // perform clean just before files are emitted to the output dir
+  // Default: false
+  beforeEmit: false
 }
 ```
 
