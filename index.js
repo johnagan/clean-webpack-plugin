@@ -187,7 +187,7 @@ CleanWebpackPlugin.prototype.apply = function(compiler) {
       compiler.plugin("compile", function(params) {
         clean.call(_this);
       });
-    } else if (_this.options.beforeEmit) {
+    } else if (_this.options.beforeEmit && !compiler.options.watch) {
       compiler.plugin("emit", function(compilation, callback) {
         clean.call(_this);
 
