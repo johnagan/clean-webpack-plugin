@@ -42,14 +42,35 @@ function CleanWebpackPlugin(paths, options) {
   // determine webpack root
   options.root = options.root || path.dirname(module.parent.filename);
 
-  // allows for a single string entry
-  if (typeof paths == 'string' || paths instanceof String) {
+  // allows for a single string entry or a regular expression
+  if (typeof paths == 'string' || paths instanceof String || paths instanceof RegExp) {
     paths = [paths];
   }
 
   // store paths and options
   this.paths = paths;
   this.options = options;
+}
+
+/**
+ * Gives back file paths that match the given pattern
+ * 
+ * @param {any} root 
+ * @param {any} pattern 
+ * @returns 
+ */
+function resolveRegexPaths(root, pattern) {
+  const rootChildren = fs.readdir(root);
+  
+  const resolvedPaths = [];
+
+  rootChildren.forEach(child => {
+    if (pattern.test(child) === true) {
+      resolvedPaths.push(child);
+    }
+  });
+
+  return resolvedPaths;
 }
 
 var clean = function() {
@@ -85,6 +106,16 @@ var clean = function() {
     projectRootDir = upperCaseWindowsRoot(projectRootDir);
     webpackDir = upperCaseWindowsRoot(webpackDir);
   }
+
+  // Resolve RegExp paths.
+  _this.paths.reduce((acc, currentPath) => {
+    if (path instanceof RegExp) {
+      const resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
+      return acc.concat(resolvedPaths);
+    }
+    return acc.push(currentPath)    
+  }, []);
+  
 
   // preform an rm -rf on each path
   _this.paths.forEach(function(rimrafPath) {
