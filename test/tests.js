@@ -137,6 +137,24 @@ var run = function (setup) {
       expect(result[0].output).to.equal('removed');
     });
 
+    // it('remove one regex match', function () {
+    //   createDir(dirOne);
+    //   cleanWebpackPlugin = new CleanWebpackPlugin(/_.+/i, { root: projectRoot });
+    //   result = cleanWebpackPlugin.apply();
+
+    //   expect(result[0].output).to.equal('removed');
+    // });
+
+    it('remove multiple regex matches', function () {
+      createDir(dirOne);
+      createDir(dirTwo);
+      cleanWebpackPlugin = new CleanWebpackPlugin([/_one/i, /_two/i], { root: projectRoot });
+      result = cleanWebpackPlugin.apply();
+
+      expect(result[0].output).to.equal('removed');
+      expect(result[1].output).to.equal('removed');
+    });
+    
     it('context backwards compatibility ', function () {
       createDir(dirOne);
       cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, projectRoot);

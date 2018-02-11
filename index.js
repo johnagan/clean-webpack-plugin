@@ -55,9 +55,9 @@ function CleanWebpackPlugin(paths, options) {
 /**
  * Gives back file paths that match the given pattern
  * 
- * @param {any} root 
- * @param {any} pattern 
- * @returns 
+ * @param {string} root 
+ * @param {RegExp} pattern 
+ * @returns [string]
  */
 function resolveRegexPaths(root, pattern) {
   const rootChildren = fs.readdir(root);
@@ -111,9 +111,9 @@ var clean = function() {
   _this.paths.reduce((acc, currentPath) => {
     if (path instanceof RegExp) {
       const resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
-      return acc.concat(resolvedPaths);
+      return [...acc, ...resolvedPaths];
     }
-    return acc.push(currentPath)    
+    return [...acc, currentPath]    
   }, []);
   
 
