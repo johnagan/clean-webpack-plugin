@@ -52,7 +52,7 @@ function CleanWebpackPlugin(paths, options) {
   this.options = options;
 }
 
-var clean = function() {
+var clean = function () {
   var _this = this;
   var results = [];
   var workingDir;
@@ -87,7 +87,7 @@ var clean = function() {
   }
 
   // preform an rm -rf on each path
-  _this.paths.forEach(function(rimrafPath) {
+  _this.paths.forEach(function (rimrafPath) {
     rimrafPath = path.resolve(_this.options.root, rimrafPath);
 
     if (os.platform() === 'win32') {
@@ -132,14 +132,14 @@ var clean = function() {
         var pathStat = fs.statSync(rimrafPath);
         if (pathStat.isDirectory()) {
           childrenAfterExcluding = fs.readdirSync(rimrafPath)
-            .filter(function(childFile) {
+            .filter(function (childFile) {
               var include = _this.options.exclude.indexOf(childFile) < 0;
               if (!include) {
                 excludedChildren.push(childFile);
               }
               return include;
             })
-            .map(function(file) {
+            .map(function (file) {
               var fullPath = path.join(rimrafPath, file);
               if (os.platform() === 'win32') {
                 fullPath = upperCaseWindowsRoot(fullPath);
@@ -157,7 +157,7 @@ var clean = function() {
 
     if (_this.options.dry !== true) {
       if (_this.options.exclude && excludedChildren.length) {
-        childrenAfterExcluding.forEach(function(child) {
+        childrenAfterExcluding.forEach(function (child) {
           rimraf.sync(child);
         });
       } else {
@@ -178,21 +178,33 @@ var clean = function() {
   return results;
 };
 
-CleanWebpackPlugin.prototype.apply = function(compiler) {
+CleanWebpackPlugin.prototype.apply = function (compiler) {
   var _this = this;
   if (compiler === undefined) {
     return clean.call(_this);
   } else {
+    const pluginName = "clean-webpack-plugin";
     if (_this.options.watch) {
-      compiler.plugin("compile", function(params) {
+      const compile = function (params) {
         clean.call(_this);
-      });
+      }
+      if (compiler.hooks) {
+        compiler.hooks.compile.tap(pluginName, compile);
+      } else {
+        compiler.plugin("compile", compile);
+      }
     } else if (_this.options.beforeEmit && !compiler.options.watch) {
-      compiler.plugin("emit", function(compilation, callback) {
-        clean.call(_this);
 
+      const emit = function (compilation, callback) {
+        clean.call(_this);
         callback();
-      });
+      };
+
+      if (compiler.hooks) {
+        compiler.hooks.emit.tapAsync(pluginName, emit);
+      } else {
+        compiler.plugin("emit", emit);
+      }
     } else {
       return clean.call(_this);
     }
