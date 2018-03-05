@@ -5,6 +5,8 @@ var os = require('os');
 var path = require('path');
 var rimraf = require('rimraf');
 
+var pluginName = 'clean-webpack-plugin';
+
 // added node .10
 // http://stackoverflow.com/questions/21698906/how-to-check-if-a-path-is-absolute-or-relative/30714706#30714706
 function isAbsolute(dir) {
@@ -183,7 +185,6 @@ CleanWebpackPlugin.prototype.apply = function(compiler) {
   if (compiler === undefined) {
     return clean.call(_this);
   } else {
-    var pluginName = "clean-webpack-plugin";
     if (_this.options.watch) {
       compiler.hooks.compile.tap(pluginName, function(params) {
         clean.call(_this);
