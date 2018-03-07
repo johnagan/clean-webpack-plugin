@@ -198,7 +198,7 @@ CleanWebpackPlugin.prototype.apply = function(compiler) {
       }
     } else if (_this.options.beforeEmit && !compiler.options.watch) {
 
-      const emit = function(compilation, callback) {
+      var emit = function(compilation, callback) {
         clean.call(_this);
         callback();
       };
