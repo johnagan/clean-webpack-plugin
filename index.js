@@ -185,16 +185,29 @@ CleanWebpackPlugin.prototype.apply = function(compiler) {
   if (compiler === undefined) {
     return clean.call(_this);
   } else {
+    // To check which version of webpack is used
+    var hooks = compiler.hooks;
     if (_this.options.watch) {
-      compiler.hooks.compile.tap(pluginName, function(params) {
+      var compile = function(params) {
         clean.call(_this);
-      });
-
+      }
+      if (hooks) {
+        hooks.compile.tap(pluginName, compile);
+      } else {
+        compiler.plugin("compile", compile);
+      }
     } else if (_this.options.beforeEmit && !compiler.options.watch) {
-      compiler.hooks.emit.tapAsync(pluginName, function(compilation, callback) {
+
+      const emit = function(compilation, callback) {
         clean.call(_this);
         callback();
-      });
+      };
+
+      if (hooks) {
+        hooks.emit.tapAsync(pluginName, emit);
+      } else {
+        compiler.plugin("emit", emit);
+      }
     } else {
       return clean.call(_this);
     }
