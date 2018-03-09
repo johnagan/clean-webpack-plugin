@@ -64,7 +64,7 @@ function resolveRegexPaths(root, pattern) {
   
   const resolvedPaths = [];
 
-  rootChildren.forEach(child => {
+  rootChildren.forEach(function (child) {
     if (pattern.test(child) === true) {
       resolvedPaths.push(child);
     }
@@ -108,13 +108,14 @@ var clean = function() {
   }
 
   // Resolve RegExp paths.
-  _this.paths.reduce((acc, currentPath) => {
-    if (path instanceof RegExp) {
+  _this.paths = _this.paths.reduce(function (acc, currentPath) {
+    if (currentPath instanceof RegExp) {
       const resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
-      return [...acc, ...resolvedPaths];
+      return acc.concat(resolvedPaths);
     }
-    return [...acc, currentPath]    
+    return acc.concat(currentPath);
   }, []);
+
   
 
   // preform an rm -rf on each path
