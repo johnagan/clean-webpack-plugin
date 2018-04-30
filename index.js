@@ -105,12 +105,12 @@ var clean = function() {
   }
 
   // Resolve RegExp paths.
-  _this.paths = _this.paths.reduce(function (acc, currentPath) {
+  _this.paths = _this.paths.reduce(function (paths, currentPath) {
     if (currentPath instanceof RegExp) {
       const resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
-      return acc.concat(resolvedPaths);
+      return paths.concat(resolvedPaths);
     }
-    return acc.concat(currentPath);
+      return paths.concat(currentPath);
   }, []);
 
 
