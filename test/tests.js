@@ -155,6 +155,16 @@ var run = function (setup) {
       expect(result[1].output).to.equal('removed');
     });
 
+    it('removes mix of regex and string matches', function () {
+      createDir(dirOne);
+      createDir(dirTwo);
+      cleanWebpackPlugin = new CleanWebpackPlugin([/_one/i, dirTwo], { root: projectRoot });
+      result = cleanWebpackPlugin.apply();
+
+      expect(result[0].output).to.equal('removed');
+      expect(result[1].output).to.equal('removed');
+    });
+
     it('context backwards compatibility ', function () {
       createDir(dirOne);
       cleanWebpackPlugin = new CleanWebpackPlugin(dirOne, projectRoot);
