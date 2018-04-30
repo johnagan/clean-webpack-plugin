@@ -107,7 +107,7 @@ var clean = function() {
   // Resolve RegExp paths.
   _this.paths = _this.paths.reduce(function (paths, currentPath) {
     if (currentPath instanceof RegExp) {
-      const resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
+      var resolvedPaths = resolveRegexPaths(_this.options.root, currentPath);
       return paths.concat(resolvedPaths);
     }
       return paths.concat(currentPath);
