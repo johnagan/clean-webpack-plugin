@@ -54,23 +54,20 @@ function CleanWebpackPlugin(paths, options) {
 
 /**
  * Gives back file paths that match the given pattern
- * 
- * @param {string} root 
- * @param {RegExp} pattern 
+ *
+ * @param {string} root
+ * @param {RegExp} pattern
  * @returns [string]
  */
 function resolveRegexPaths(root, pattern) {
-  const rootChildren = fs.readdir(root);
-  
-  const resolvedPaths = [];
+  var rootChildren = fs.readdir(root);
 
-  rootChildren.forEach(function (child) {
-    if (pattern.test(child) === true) {
-      resolvedPaths.push(child);
+  return rootChildren.reduce(function(paths, child) {
+    if(pattern.test(child) === true) {
+      paths.push(child);
     }
-  });
-
-  return resolvedPaths;
+    return paths;
+  }, []);
 }
 
 var clean = function() {
@@ -116,7 +113,7 @@ var clean = function() {
     return acc.concat(currentPath);
   }, []);
 
-  
+
 
   // preform an rm -rf on each path
   _this.paths.forEach(function(rimrafPath) {
