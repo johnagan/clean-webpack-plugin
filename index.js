@@ -64,12 +64,7 @@ function CleanWebpackPlugin(paths, options) {
 function resolveRegexPaths(root, pattern) {
   var rootChildren = fs.readdirSync(root);
 
-  return rootChildren.reduce(function(paths, child) {
-    if(pattern.test(child) === true) {
-      paths.push(child);
-    }
-    return paths;
-  }, []);
+  return rootChildren.filter(pattern.test.bind(pattern));
 }
 
 var clean = function() {
