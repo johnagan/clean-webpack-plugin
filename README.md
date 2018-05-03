@@ -32,10 +32,7 @@ const webpack = require('webpack'); //to access built-in plugins
 const path = require('path');
 
 // the path(s) that should be cleaned
-let pathsToClean = [
-  'dist',
-  'build'
-]
+let pathsToClean = /dist|build/;
 
 // the clean options to use
 let cleanOptions = {
@@ -71,12 +68,13 @@ const webpackConfig = {
 
 
 ### Paths (Required)
-An [array] of string paths to clean
+An [array] of string or regex paths to clean
 ```js
 [
   'dist',         // removes 'dist' folder
   'build/*.*',    // removes all files in 'build' folder
-  'web/*.js'      // removes all JavaScript files in 'web' folder
+  'web/*.js',     // removes all JavaScript files in 'web' folder
+  /_.+/i,         // removes all the files / folders matching the regex
 ]
 ```
 
