@@ -94,6 +94,13 @@ var run = function (setup) {
       expect(result[0].output).to.equal('would delete webpack');
     });
 
+    it('would not delete webpack', function () {
+      cleanWebpackPlugin = new CleanWebpackPlugin(['./test'], { root: null });
+      result = cleanWebpackPlugin.apply();
+
+      expect(result[0].output).to.not.equal('would delete webpack');
+    });
+
 
     it('remove direct', function () {
       createDir(dirOne);

@@ -79,13 +79,13 @@ var clean = function() {
   workingDir = process.cwd();
   dirName = __dirname;
   projectRootDir = path.resolve(_this.options.root);
-  webpackDir = path.dirname(module.parent.filename);
+  webpackDir = module.parent && path.dirname(module.parent.filename);
 
   if (os.platform() === 'win32') {
     workingDir = upperCaseWindowsRoot(workingDir);
     dirName = upperCaseWindowsRoot(dirName);
     projectRootDir = upperCaseWindowsRoot(projectRootDir);
-    webpackDir = upperCaseWindowsRoot(webpackDir);
+    webpackDir = webpackDir && upperCaseWindowsRoot(webpackDir);
   }
 
   // preform an rm -rf on each path
