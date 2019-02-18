@@ -1,0 +1,10 @@
+.cache
+.idea
+.vscode
+node_modules
+coverage
+dist
+static
+package.json
+package-lock.json
+__sandbox__

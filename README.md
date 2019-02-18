@@ -1,121 +1,128 @@
-# Clean for WebPack
-A webpack plugin to remove/clean your build folder(s) before building
+# Clean plugin for webpack
 
-![MIT License](https://camo.githubusercontent.com/d59450139b6d354f15a2252a47b457bb2cc43828/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f6c2f7365727665726c6573732e737667)
-[![Build Status][travis-image]][travis-url]
+[![npm][npm-image]][npm-url]
+[![MIT License][mit-license-image]][mit-license-url]
+[![Linux Build Status][travis-image]][travis-url]
+[![Windows Build Status][appveyor-image]][appveyor-url]
 [![Coveralls Status][coveralls-image]][coveralls-url]
 
+[npm-url]: https://www.npmjs.com/package/clean-webpack-plugin
+[npm-image]: https://img.shields.io/npm/v/clean-webpack-plugin.svg?label=npm%20version
+[mit-license-url]: LICENSE
+[mit-license-image]: https://camo.githubusercontent.com/d59450139b6d354f15a2252a47b457bb2cc43828/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f6c2f7365727665726c6573732e737667
+[travis-url]: https://travis-ci.org/johnagan/clean-webpack-plugin
+[travis-image]: https://img.shields.io/travis/johnagan/clean-webpack-plugin/master.svg?label=linux%20build
+[appveyor-url]: https://ci.appveyor.com/project/johnagan/clean-webpack-plugin/branch/master
+[appveyor-image]: https://img.shields.io/appveyor/ci/johnagan/clean-webpack-plugin/master.svg?label=windows%20build
+[coveralls-url]: https://codecov.io/gh/johnagan/clean-webpack-plugin/branch/master
+[coveralls-image]: https://img.shields.io/codecov/c/github/johnagan/clean-webpack-plugin/master.svg
+
+A webpack plugin to remove/clean your build folder(s).
+
 ## Installation
-```
-npm i clean-webpack-plugin --save-dev
-```
+
+`npm install --save-dev clean-webpack-plugin`
 
 ## Usage
+
 ```js
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 // webpack config
-{
-  plugins: [
-    new CleanWebpackPlugin(paths [, {options}])
-  ]
-}
+module.exports = {
+    plugins: [
+        new CleanWebpackPlugin(
+            // See Options and Defaults
+            {},
+        ),
+    ],
+};
 ```
 
 ## Example Webpack Config
+
 This is a modified version of [WebPack's Plugin documentation](https://webpack.js.org/concepts/plugins/) that includes the Clean Plugin.
 
 ```js
-const CleanWebpackPlugin = require('clean-webpack-plugin'); //installed via npm
-const HtmlWebpackPlugin = require('html-webpack-plugin'); //installed via npm
-const webpack = require('webpack'); //to access built-in plugins
-const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin'); // installed via npm
+const HtmlWebpackPlugin = require('html-webpack-plugin'); // installed via npm
+const webpack = require('webpack'); // to access built-in plugins
 
-// the path(s) that should be cleaned
-let pathsToClean = [
-  'dist',
-  'build'
-]
-
-// the clean options to use
-let cleanOptions = {
-  root:     '/full/webpack/root/path',
-  exclude:  ['shared.js'],
-  verbose:  true,
-  dry:      false
-}
-
-// sample WebPack config
-const webpackConfig = {
-  entry: './path/to/my/entry/file.js',
-  output: {
-    filename: 'my-first-webpack.bundle.js',
-    path: path.resolve(__dirname, 'dist')
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(js|jsx)$/,
-        loader: 'babel-loader'
-      }
-    ]
-  },
-  plugins: [
-    new CleanWebpackPlugin(pathsToClean, cleanOptions),
-    new webpack.optimize.UglifyJsPlugin(),
-    new HtmlWebpackPlugin({template: './src/index.html'})
-  ]
-}
-
+module.exports = {
+    entry: './path/to/my/entry/file.js',
+    module: {
+        rules: [
+            {
+                test: /\.(js|jsx)$/,
+                loader: 'babel-loader',
+            },
+        ],
+    },
+    plugins: [
+        new webpack.ProgressPlugin(),
+        new CleanWebpackPlugin(),
+        new HtmlWebpackPlugin({ template: './src/index.html' }),
+    ],
+};
 ```
 
+### Options and Defaults (Optional)
 
-### Paths (Required)
-An [array] of string paths to clean
 ```js
-[
-  'dist',         // removes 'dist' folder
-  'build/*.*',    // removes all files in 'build' folder
-  'web/*.js'      // removes all JavaScript files in 'web' folder
-]
+new CleanWebpackPlugin({
+    /**
+     * Simulate the removal of files
+     *
+     * default: false
+     */
+    dryRun: true,
+
+    /**
+     * Write Logs to Console
+     * (Always enabled when dryRun is true)
+     *
+     * default: false
+     */
+    verbose: true,
+
+    /**
+     * **WARNING**
+     *
+     * Notes on the below options customPatterns and initialPatterns:
+     *
+     * Neither of these options are recommended.
+     * Use only if you know what you are doing.
+     *
+     * They are unsafe...so test initially with dryRun: true.
+     *
+     * Relative to webpack's output.path directory.
+     * If outside of webpack's output.path directory,
+     *    use full path. path.join(process.cwd(), '')
+     *
+     * These options extend del's pattern matching API.
+     * See https://github.com/sindresorhus/del#patterns
+     *    for pattern matching documentation
+     */
+
+    /**
+     * Removes files once prior to Webpack compilation
+     *
+     * See Usage example.
+     *
+     * NOTE: customPatterns are included with this
+     *
+     * default: disabled
+     */
+    initialPatterns: ['**'],
+
+    /**
+     * Custom pattern matching
+     *
+     * Removes files on after every build that match this pattern.
+     * Used for files that are not created directly by Webpack.
+     *
+     * default: disabled
+     */
+    customPatterns: ['static*.*', '!static1.js'],
+});
 ```
-
-
-### Options and defaults (Optional)
-```js
-{
-  // Absolute path to your webpack root folder (paths appended to this)
-  // Default: root of your package
-  root: __dirname,
-
-  // Write logs to console.
-  verbose: true,
-  
-  // Use boolean "true" to test/emulate delete. (will not remove files).
-  // Default: false - remove files
-  dry: false,           
-
-  // If true, remove files on recompile. 
-  // Default: false
-  watch: false,
-
-  // Instead of removing whole path recursively,
-  // remove all path's content with exclusion of provided immediate children.
-  // Good for not removing shared files from build directories.
-  exclude: [ 'files', 'to', 'ignore' ],
-
-  // allow the plugin to clean folders outside of the webpack root.
-  // Default: false - don't allow clean folder outside of the webpack root
-  allowExternal: false
-  
-  // perform clean just before files are emitted to the output dir
-  // Default: false
-  beforeEmit: false
-}
-```
-
-[travis-url]: https://travis-ci.org/johnagan/clean-webpack-plugin
-[travis-image]: https://travis-ci.org/johnagan/clean-webpack-plugin.svg
-
-[coveralls-url]: https://coveralls.io/github/johnagan/clean-webpack-plugin
-[coveralls-image]: https://coveralls.io/repos/johnagan/clean-webpack-plugin/badge.svg

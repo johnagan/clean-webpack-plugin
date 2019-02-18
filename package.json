@@ -1,11 +1,18 @@
 {
   "name": "clean-webpack-plugin",
-  "version": "1.0.1",
+  "version": "2.0.0-alpha1",
   "author": "John Agan <johnagan@gmail.com>",
   "description": "A webpack plugin to remove your build folder(s) before building",
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/clean-webpack-plugin.js",
+  "types": "dist/clean-webpack-plugin.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "engines": {
+    "node": ">=6.9.0"
+  },
   "keywords": [
     "webpack",
     "plugin",
@@ -20,18 +27,59 @@
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
   "scripts": {
-    "test": "mocha --recursive ./test/*_spec.js",
-    "test:watch": "npm run test -- --watch",
-    "test-travis": "istanbul cover _mocha -- -R spec ./test/*_spec.js"
+    "clean": "del-cli --dot=true \"./dist/*\"",
+    "build": "npm run clean && npm run build.compile && npm run build.types",
+    "build.compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .ts --ignore */**/*.d.ts,**/**/*.test.ts --source-maps",
+    "build.types": "cross-env NODE_ENV=production tsc --project tsconfig.types.json",
+    "dev": "npm run clean && cross-env NODE_ENV=development babel -w src -d dist --verbose --extensions .ts --ignore */**/*.d.ts,**/**/*.test.ts --source-maps",
+    "lint": "eslint --ext .js,.ts .",
+    "lint.fix": "eslint --ext .js,.ts --fix .",
+    "format": "prettier \"**/*.{js,mjs,jsx,ts,tsx,json,scss,less,css,md,yml,yaml}\" --write",
+    "test": "jest",
+    "test.update": "jest --update-snapshot",
+    "test.watch": "jest --watch",
+    "test.all": "node ./dev-utils/test-supported-webpack-versions.js",
+    "test.ci": "npm run build && npm run lint && npm run typescript && npm run test.all -- --ci",
+    "typescript": "tsc",
+    "git-pre-commit": "lint-staged",
+    "git-pre-push": "npm run lint && npm run typescript && npm run test.all",
+    "prepublishOnly": "npm run build && npm run lint && npm run typescript && npm run test.all"
   },
-  "dependencies": {
-    "rimraf": "^2.6.1"
+  "peerDependencies": {
+    "webpack": "*"
   },
   "devDependencies": {
-    "chai": "^4.1.1",
-    "coveralls": "^2.13.1",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.5.0",
-    "rewire": "^2.5.2"
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/plugin-transform-strict-mode": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-typescript": "^7.3.3",
+    "@chrisblossom/eslint-config": "^4.0.9",
+    "@types/del": "^3.0.1",
+    "@types/jest": "^24.0.6",
+    "@types/node": "^11.9.4",
+    "@types/read-pkg-up": "^3.0.1",
+    "@types/webpack": "^4.4.24",
+    "babel-jest": "^24.1.0",
+    "babel-plugin-add-module-exports": "^1.0.0",
+    "codecov": "^3.2.0",
+    "cross-env": "^5.2.0",
+    "del-cli": "^1.1.0",
+    "eslint": "^5.14.1",
+    "execa": "^1.0.0",
+    "husky": "^1.3.1",
+    "jest": "^24.1.0",
+    "lint-staged": "^8.1.4",
+    "listr": "^0.14.3",
+    "prettier": "^1.16.4",
+    "read-pkg-up": "^4.0.0",
+    "semver": "^5.6.0",
+    "temp-sandbox": "^1.0.16",
+    "typescript": "^3.3.3",
+    "webpack": "^4.29.5"
+  },
+  "dependencies": {
+    "del": "^3.0.0"
   }
 }
