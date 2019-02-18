@@ -1,0 +1,22 @@
+# http://editorconfig.org/
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+# The indentation in package.json will always need to be 2 spaces
+# https://github.com/npm/npm/issues/4718
+[package.json]
+indent_style = space
+indent_size = 2
