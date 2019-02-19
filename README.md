@@ -7,7 +7,7 @@ A webpack plugin to remove/clean your build folder(s) before building
 
 ## Installation
 ```
-npm i clean-webpack-plugin --save-dev
+yarn add clean-webpack-plugin --dev
 ```
 
 ## Usage
