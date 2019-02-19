@@ -85,10 +85,10 @@ An [array] of string paths to clean
 {
   // Absolute path to your webpack root folder (paths appended to this)
   // Default: root of your package
-  root: __dirname,
+  cwd: __dirname,
 
   // Write logs to console.
-  verbose: true,
+  verbose: false,
   
   // Use boolean "true" to test/emulate delete. (will not remove files).
   // Default: false - remove files
