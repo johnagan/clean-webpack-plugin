@@ -2,9 +2,7 @@ import { Compiler } from "webpack";
 import ora from "ora";
 export declare class CleanWebpackPlugin {
     /** The results of a clean */
-    results: {
-        [key in CleanWebpackPluginAction]: string[];
-    };
+    results: CleanWebpackPluginResults;
     /** The configuration options for the plugin */
     options: CleanWebpackPluginOptions;
     /** The CLI spinner */

@@ -113,17 +113,20 @@ test("paths excluded", () => {
 });
 
 test("skip external paths", () => {
-  const paths = join(testRoot, "..", "..", "*");
+  const paths = join("..", "*");
+  const cwd = join(__dirname, "..", "test");
   const cwp = new CleanWebpackPlugin(paths, { cwd, dry: true });
   cwp.clean();
 
   const { deleted, errors } = cwp.results;
+  console.log(deleted);
   expect(deleted.length).toBe(1);
   expect(errors.length).toBe(0);
 });
 
 test("include external paths", () => {
-  const paths = join(testRoot, "..", "..", "*");
+  const paths = join("..", "*");
+  const cwd = join(__dirname, "..", "test");
   const cwp = new CleanWebpackPlugin(paths, { cwd, allowExternal: true, dry: true });
   cwp.clean();
 

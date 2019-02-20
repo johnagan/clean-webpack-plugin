@@ -2,6 +2,8 @@ declare type CleanWebpackPluginPath = string | string[];
 
 declare type CleanWebpackPluginAction = "deleted" | "skipped" | "errors";
 
+declare type CleanWebpackPluginResults = { [key in CleanWebpackPluginAction]: string[] };
+
 declare interface CleanWebpackPluginOptions {
   /**
    * The path to your webpack root folder (paths appended to this)

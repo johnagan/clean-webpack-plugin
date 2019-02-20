@@ -1,6 +1,6 @@
+import { emptyDirSync, lstatSync, unlinkSync } from "fs-extra";
 import { dirname, resolve } from "path";
 import { Compiler } from "webpack";
-import { emptyDirSync, lstatSync, unlinkSync } from "fs-extra";
 import { sync } from "glob";
 import ora from "ora";
 
@@ -8,7 +8,7 @@ const PLUGIN_NAME = "clean-webpack-plugin";
 
 export class CleanWebpackPlugin {
   /** The results of a clean */
-  public results: { [key in CleanWebpackPluginAction]: string[] };
+  public results: CleanWebpackPluginResults;
 
   /** The configuration options for the plugin */
   public options: CleanWebpackPluginOptions;
@@ -50,6 +50,12 @@ export class CleanWebpackPlugin {
       exclude: [],
       dry: false
     };
+
+    // deprecation warning
+    if (options && options.root) {
+      options.cwd = options.root;
+      console.warn("the root option is deprecated. use cwd instead.");
+    }
 
     // assign to instance
     return { ...defaults, ...options };
