@@ -119,7 +119,6 @@ test("skip external paths", () => {
   cwp.clean();
 
   const { deleted, errors } = cwp.results;
-  console.log(deleted);
   expect(deleted.length).toBe(1);
   expect(errors.length).toBe(0);
 });
