@@ -3,44 +3,69 @@ import path from 'path';
 import del from 'del';
 
 interface Options {
-    dryRun: boolean;
+    /**
+     * Simulate the removal of files
+     */
+    dry: boolean;
+
+    /**
+     * console.warn removed files
+     */
     verbose: boolean;
+
+    /**
+     * File patterns to files after webpack has been successfully ran
+     *
+     * use !negative patterns to exclude files
+     *
+     * See https://github.com/sindresorhus/del#patterns
+     */
     customPatterns: string[];
+
+    /**
+     * Remove files once prior to compilation
+     *
+     * use !negative patterns to exclude files
+     *
+     * See https://github.com/sindresorhus/del#patterns
+     */
     initialPatterns: string[];
+
+    /**
+     * Allow clean patterns outside of process.cwd()
+     */
+    allowExternal: boolean;
 }
 
 class CleanWebpackPlugin {
-    private readonly options: Options;
+    private readonly dry: boolean;
+    private readonly verbose: boolean;
+    private readonly customPatterns: string[];
+    private readonly initialPatterns: string[];
+    private readonly allowExternal: boolean;
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
 
     constructor(options: Partial<Options> = {}) {
-        this.options = {
-            /**
-             * Simulate the removal of files
-             */
-            dryRun: options.dryRun || false,
+        if (typeof options !== 'object' || Array.isArray(options) === true) {
+            throw new Error(`clean-webpack-plugin only accepts an options object. See: 
+            https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
+        }
 
-            /**
-             * console.warn removed files
-             */
-            verbose: options.dryRun || options.verbose || false,
+        this.dry = options.dry === true || false;
+        this.verbose =
+            options.dry === true || options.verbose === true || false;
 
-            /**
-             * Custom pattern matching
-             *
-             * See https://github.com/sindresorhus/del#patterns
-             */
-            customPatterns: options.customPatterns || [],
+        this.customPatterns = Array.isArray(options.customPatterns)
+            ? options.customPatterns
+            : [];
 
-            /**
-             * Remove files once prior to compilation
-             *
-             * See https://github.com/sindresorhus/del#patterns
-             */
-            initialPatterns: options.initialPatterns || [],
-        };
+        this.initialPatterns = Array.isArray(options.initialPatterns)
+            ? options.initialPatterns
+            : ['**'];
+
+        this.allowExternal = options.allowExternal === true || false;
 
         /**
          * Store webpack build assets
@@ -79,7 +104,7 @@ class CleanWebpackPlugin {
          */
         const hooks = compiler.hooks;
 
-        if (this.options.initialPatterns.length !== 0) {
+        if (this.initialPatterns.length !== 0) {
             if (hooks) {
                 hooks.compile.tap('clean-webpack-plugin', () => {
                     this.handleInitial();
@@ -107,7 +132,7 @@ class CleanWebpackPlugin {
      *
      * Only happens once.
      *
-     * Warning: It is highly recommended to clean your build directory outside of webpack to minimize unexpected behavior.
+     * Warning: It is recommended to initially clean your build directory outside of webpack to minimize unexpected behavior.
      */
     handleInitial() {
         if (this.initialClean) {
@@ -116,10 +141,7 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        this.removeFiles([
-            ...this.options.initialPatterns,
-            ...this.options.customPatterns,
-        ]);
+        this.removeFiles([...this.initialPatterns, ...this.customPatterns]);
     }
 
     handleDone(stats: Stats) {
@@ -127,7 +149,7 @@ class CleanWebpackPlugin {
          * Do nothing if there is a webpack error
          */
         if (stats.hasErrors()) {
-            if (this.options.verbose) {
+            if (this.verbose) {
                 // eslint-disable-next-line no-console
                 console.warn(
                     'clean-webpack-plugin: pausing due to webpack errors',
@@ -163,44 +185,59 @@ class CleanWebpackPlugin {
         /**
          * Do nothing if there aren't any files to delete and customPatterns is not defined
          */
-        if (
-            staleFiles.length === 0 &&
-            this.options.customPatterns.length === 0
-        ) {
+        if (staleFiles.length === 0 && this.customPatterns.length === 0) {
             return;
         }
 
         /**
          * Merge customPatters with stale files.
          */
-        this.removeFiles([...staleFiles, ...this.options.customPatterns]);
+        this.removeFiles([...staleFiles, ...this.customPatterns]);
     }
 
     removeFiles(patterns: string[]) {
-        const deleted = del.sync(patterns, {
-            // Change context to build directory
-            cwd: this.outputPath,
-            dryRun: this.options.dryRun,
-            dot: true,
-        });
-
-        /**
-         * Log if verbose is enabled
-         */
-        if (this.options.verbose) {
-            deleted.forEach((file) => {
-                const filename = path.relative(this.outputPath, file);
-
-                const message = this.options.dryRun ? 'dryRun' : 'removed';
-
-                /**
-                 * Use console.warn over .log
-                 * https://github.com/webpack/webpack/issues/1904
-                 * https://github.com/johnagan/clean-webpack-plugin/issues/11
-                 */
-                // eslint-disable-next-line no-console
-                console.warn(`clean-webpack-plugin: ${message} ${filename}`);
+        try {
+            const deleted = del.sync(patterns, {
+                force: this.allowExternal,
+                // Change context to build directory
+                cwd: this.outputPath,
+                dryRun: this.dry,
+                dot: true,
             });
+
+            /**
+             * Log if verbose is enabled
+             */
+            if (this.verbose) {
+                deleted.forEach((file) => {
+                    const filename = path.relative(process.cwd(), file);
+
+                    const message = this.dry ? 'dry' : 'removed';
+
+                    /**
+                     * Use console.warn over .log
+                     * https://github.com/webpack/webpack/issues/1904
+                     * https://github.com/johnagan/clean-webpack-plugin/issues/11
+                     */
+                    // eslint-disable-next-line no-console
+                    console.warn(
+                        `clean-webpack-plugin: ${message} ${filename}`,
+                    );
+                });
+            }
+        } catch (error) {
+            const needsForce = /Cannot delete files\/folders outside the current working directory\./.test(
+                error.message,
+            );
+
+            if (needsForce) {
+                const message =
+                    'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `allowExternal` option.';
+
+                throw new Error(message);
+            }
+
+            throw error;
         }
     }
 }

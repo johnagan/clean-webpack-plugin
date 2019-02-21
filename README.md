@@ -28,15 +28,84 @@ A webpack plugin to remove/clean your build folder(s).
 ```js
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-// webpack config
-module.exports = {
+const webpackConfig = {
     plugins: [
-        new CleanWebpackPlugin(
-            // See Options and Defaults
-            {},
-        ),
+        // See Options and Defaults
+        new CleanWebpackPlugin(),
     ],
 };
+
+module.exports = webpackConfig;
+```
+
+### Options and Defaults (Optional)
+
+```js
+new CleanWebpackPlugin({
+    /**
+     * Simulate the removal of files
+     *
+     * default: false
+     */
+    dry: true,
+
+    /**
+     * Write Logs to Console
+     * (Always enabled when dry is true)
+     *
+     * default: false
+     */
+    verbose: true,
+
+    /**
+     * **WARNING**
+     *
+     * Notes for the below options:
+     *
+     * They are unsafe...so test initially with dry: true.
+     *
+     * Relative to webpack's output.path directory.
+     * If outside of webpack's output.path directory,
+     *    use full path. path.join(process.cwd(), 'build/**')
+     *
+     * These options extend del's pattern matching API.
+     * See https://github.com/sindresorhus/del#patterns
+     *    for pattern matching documentation
+     */
+
+    /**
+     * Removes files once prior to Webpack compilation
+     *
+     * NOTE: customPatterns are included with this
+     *
+     * Use !negative patterns to exclude files
+     *
+     * default: ['**']
+     */
+    initialPatterns: ['**', '!static-files*'],
+    initialPatterns: [], // disables initialPatterns
+    cleanBeforeBuildPatterns: [],
+
+    /**
+     * Custom pattern matching
+     *
+     * Removes files on after every build (watch mode) that match this pattern.
+     * Used for files that are not created directly by Webpack.
+     *
+     * Use !negative patterns to exclude files
+     *
+     * default: disabled
+     */
+    customPatterns: ['static*.*', '!static1.js'],
+    cleanAfterBuildPatterns: [],
+
+    /**
+     * Allow clean patterns outside of process.cwd()
+     *
+     * default: false
+     */
+    allowExternal: true,
+});
 ```
 
 ## Example Webpack Config
@@ -64,65 +133,4 @@ module.exports = {
         new HtmlWebpackPlugin({ template: './src/index.html' }),
     ],
 };
-```
-
-### Options and Defaults (Optional)
-
-```js
-new CleanWebpackPlugin({
-    /**
-     * Simulate the removal of files
-     *
-     * default: false
-     */
-    dryRun: true,
-
-    /**
-     * Write Logs to Console
-     * (Always enabled when dryRun is true)
-     *
-     * default: false
-     */
-    verbose: true,
-
-    /**
-     * **WARNING**
-     *
-     * Notes on the below options customPatterns and initialPatterns:
-     *
-     * Neither of these options are recommended.
-     * Use only if you know what you are doing.
-     *
-     * They are unsafe...so test initially with dryRun: true.
-     *
-     * Relative to webpack's output.path directory.
-     * If outside of webpack's output.path directory,
-     *    use full path. path.join(process.cwd(), '')
-     *
-     * These options extend del's pattern matching API.
-     * See https://github.com/sindresorhus/del#patterns
-     *    for pattern matching documentation
-     */
-
-    /**
-     * Removes files once prior to Webpack compilation
-     *
-     * See Usage example.
-     *
-     * NOTE: customPatterns are included with this
-     *
-     * default: disabled
-     */
-    initialPatterns: ['**'],
-
-    /**
-     * Custom pattern matching
-     *
-     * Removes files on after every build that match this pattern.
-     * Used for files that are not created directly by Webpack.
-     *
-     * default: disabled
-     */
-    customPatterns: ['static*.*', '!static1.js'],
-});
 ```

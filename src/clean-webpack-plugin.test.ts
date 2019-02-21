@@ -103,16 +103,6 @@ beforeEach(() => {
      * Prepare directories
      */
     sandbox.cleanSync();
-
-    /**
-     * Add static files that are not part of the webpack bundle
-     */
-    createStaticFiles();
-
-    /**
-     * Create initial entry.js without any additional bundles
-     */
-    createSrcBundle(1);
 });
 
 afterEach(() => {
@@ -157,8 +147,9 @@ test('adds files to current assets', async () => {
     ]);
 });
 
-test('removes only webpack files', async () => {
+test('removes initial files by default', async () => {
     createSrcBundle(2);
+    createStaticFiles();
 
     const cleanWebpackPlugin = new CleanWebpackPlugin();
 
@@ -187,12 +178,7 @@ test('removes only webpack files', async () => {
 
     expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-    expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
-        'bundle.js',
-        'static1.js',
-        'static2.txt',
-    ]);
+    expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
 });
 
 test('removes nested files', async () => {
@@ -229,65 +215,9 @@ test('removes nested files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
         'js/bundle.js',
         'js/chunks/1.bundle.js',
-        'static1.js',
-        'static2.txt',
     ]);
-});
-
-test('does nothing when nothing changes or files added but not removed', async () => {
-    createSrcBundle(1);
-
-    const cleanWebpackPlugin = new CleanWebpackPlugin();
-    const removeFilesSpy = jest.spyOn(cleanWebpackPlugin, 'removeFiles');
-
-    const compiler = webpack({
-        entry: entryFileFull,
-        output: {
-            path: outputPathFull,
-            filename: 'bundle.js',
-            chunkFilename: '[name].bundle.js',
-        },
-        plugins: [cleanWebpackPlugin],
-    });
-
-    expect(cleanWebpackPlugin.currentAssets).toEqual([]);
-
-    await compiler.run();
-
-    expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
-
-    await compiler.run();
-
-    expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
-
-    expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
-        'bundle.js',
-        'static1.js',
-        'static2.txt',
-    ]);
-
-    createSrcBundle(2);
-
-    await compiler.run();
-
-    expect(cleanWebpackPlugin.currentAssets).toEqual([
-        '1.bundle.js',
-        'bundle.js',
-    ]);
-
-    expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
-        '1.bundle.js',
-        'bundle.js',
-        'static1.js',
-        'static2.txt',
-    ]);
-
-    expect(removeFilesSpy).not.toHaveBeenCalled();
 });
 
 test('removes map files', async () => {
@@ -318,13 +248,10 @@ test('removes map files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
         '1.bundle.js',
         '1.bundle.js.map',
         'bundle.js',
         'bundle.js.map',
-        'static1.js',
-        'static2.txt',
     ]);
 
     createSrcBundle(1);
@@ -337,21 +264,21 @@ test('removes map files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '.hidden.file',
         'bundle.js',
         'bundle.js.map',
-        'static1.js',
-        'static2.txt',
     ]);
 });
 
-describe('customPatterns option', () => {
-    test('removes with customPatterns', async () => {
-        createSrcBundle(2);
+describe('initialPatterns option', () => {
+    test('does nothing when nothing changes or files added but not removed', async () => {
+        createSrcBundle(1);
+        createStaticFiles();
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            customPatterns: ['static*.*', '!static1.js'],
+            initialPatterns: [],
         });
+
+        const removeFilesSpy = jest.spyOn(cleanWebpackPlugin, 'removeFiles');
 
         const compiler = webpack({
             entry: entryFileFull,
@@ -367,19 +294,7 @@ describe('customPatterns option', () => {
 
         await compiler.run();
 
-        expect(cleanWebpackPlugin.currentAssets).toEqual([
-            '1.bundle.js',
-            'bundle.js',
-        ]);
-
-        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            '1.bundle.js',
-            'bundle.js',
-            'static1.js',
-        ]);
-
-        createSrcBundle(1);
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         await compiler.run();
 
@@ -389,71 +304,17 @@ describe('customPatterns option', () => {
             '.hidden.file',
             'bundle.js',
             'static1.js',
+            'static2.txt',
         ]);
-    });
 
-    test('handles the customPatterns outside of build directory', async () => {
-        createSrcBundle(1);
-
-        const outsideDistPath = 'build';
-        sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
-
-        const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
-        expect(initialOutsideFiles).toEqual(['outside-file.js']);
-
-        const cleanWebpackPlugin = new CleanWebpackPlugin({
-            customPatterns: [path.join(sandbox.dir, 'build/**')],
-        });
-
-        const compiler = webpack({
-            entry: entryFileFull,
-            output: {
-                path: outputPathFull,
-                filename: 'bundle.js',
-                chunkFilename: '[name].bundle.js',
-            },
-            plugins: [cleanWebpackPlugin],
-        });
-
-        await compiler.run();
-
-        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
-    });
-});
-
-describe('dryRun option', () => {
-    test('respects dryRun option (force verbose)', async () => {
         createSrcBundle(2);
 
-        const cleanWebpackPlugin = new CleanWebpackPlugin({
-            dryRun: true,
-            verbose: false,
-        });
-
-        const compiler = webpack({
-            entry: entryFileFull,
-            output: {
-                path: outputPathFull,
-                filename: 'bundle.js',
-                chunkFilename: '[name].bundle.js',
-            },
-            plugins: [cleanWebpackPlugin],
-        });
-
-        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
-
         await compiler.run();
 
         expect(cleanWebpackPlugin.currentAssets).toEqual([
             '1.bundle.js',
             'bundle.js',
         ]);
-
-        createSrcBundle(1);
-
-        await compiler.run();
-
-        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
             '.hidden.file',
@@ -463,18 +324,22 @@ describe('dryRun option', () => {
             'static2.txt',
         ]);
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-            'clean-webpack-plugin: dryRun 1.bundle.js',
-        );
+        expect(removeFilesSpy).not.toHaveBeenCalled();
     });
-});
 
-describe('verbose option', () => {
-    test('respects verbose option - true', async () => {
-        createSrcBundle(2);
+    test('only calls once initialPatterns once', async () => {
+        createSrcBundle(1);
+        createStaticFiles();
+
+        const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
+        expect(initialBuildFiles).toEqual([
+            '.hidden.file',
+            'static1.js',
+            'static2.txt',
+        ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            verbose: true,
+            initialPatterns: ['**'],
         });
 
         const compiler = webpack({
@@ -487,45 +352,31 @@ describe('verbose option', () => {
             plugins: [cleanWebpackPlugin],
         });
 
-        await compiler.run();
-
-        createSrcBundle(1);
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
 
         await compiler.run();
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-            'clean-webpack-plugin: removed 1.bundle.js',
-        );
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+
+        createStaticFiles();
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '.hidden.file',
+            'bundle.js',
+            'static1.js',
+            'static2.txt',
+        ]);
     });
 
-    test('respects verbose option - false', async () => {
-        createSrcBundle(2);
-
-        const cleanWebpackPlugin = new CleanWebpackPlugin({
-            verbose: false,
-        });
-
-        const compiler = webpack({
-            entry: entryFileFull,
-            output: {
-                path: outputPathFull,
-                filename: 'bundle.js',
-                chunkFilename: '[name].bundle.js',
-            },
-            plugins: [cleanWebpackPlugin],
-        });
-
-        await compiler.run();
+    test('overrides default initialPatterns', async () => {
         createSrcBundle(1);
-        await compiler.run();
-
-        expect(consoleSpy).not.toHaveBeenCalled();
-    });
-});
-
-describe('initialPatterns option', () => {
-    test('handles the initialPatterns option (only calls once)', async () => {
-        createSrcBundle(1);
+        createStaticFiles();
 
         const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
         expect(initialBuildFiles).toEqual([
@@ -574,8 +425,9 @@ describe('initialPatterns option', () => {
         ]);
     });
 
-    test('handles the initialPatterns removes all files with **', async () => {
+    test('excludes files with override pattern matching', async () => {
         createSrcBundle(1);
+        createStaticFiles();
 
         const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
         expect(initialBuildFiles).toEqual([
@@ -585,7 +437,7 @@ describe('initialPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: ['**'],
+            initialPatterns: ['**', '!static2.*'],
         });
 
         const compiler = webpack({
@@ -604,7 +456,10 @@ describe('initialPatterns option', () => {
 
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            'bundle.js',
+            'static2.txt',
+        ]);
 
         createStaticFiles();
 
@@ -649,16 +504,248 @@ describe('initialPatterns option', () => {
     });
 });
 
+describe('customPatterns option', () => {
+    test('removes with customPatterns', async () => {
+        createSrcBundle(2);
+        createStaticFiles();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            customPatterns: ['static*.*', '!static1.js'],
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+            'static1.js',
+        ]);
+
+        createSrcBundle(1);
+        createStaticFiles();
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '.hidden.file',
+            'bundle.js',
+            'static1.js',
+        ]);
+    });
+
+    test('handles the customPatterns outside of webpack output directory', async () => {
+        createSrcBundle(1);
+
+        const outsideDistPath = 'build';
+        sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
+
+        const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
+        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            customPatterns: [path.join(sandbox.dir, 'build/**')],
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        await compiler.run();
+
+        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
+    });
+});
+
+describe('allowExternal option', () => {
+    test('will not files outside of process.cwd(), allowExternal: false (by default)', async () => {
+        process.chdir(cwd);
+        createSrcBundle(1);
+
+        const outsideDistPath = 'build';
+        sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
+
+        const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
+        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            customPatterns: [path.join(sandbox.dir, 'build/**')],
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        await expect(compiler.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the \`allowExternal\` option."`,
+        );
+    });
+
+    test('removes files outside of process.cwd() with allowExternal: true', async () => {
+        process.chdir(cwd);
+        createSrcBundle(1);
+
+        const outsideDistPath = 'build';
+        sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
+
+        const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
+        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            allowExternal: true,
+            customPatterns: [path.join(sandbox.dir, 'build/**')],
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        await compiler.run();
+
+        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
+    });
+});
+
+describe('dry option', () => {
+    test('respects dry option (force verbose)', async () => {
+        createSrcBundle(2);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            dry: true,
+            verbose: false,
+        });
+
+        expect(cleanWebpackPlugin.verbose).toEqual(true);
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        createSrcBundle(1);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+            'clean-webpack-plugin: dry dist/1.bundle.js',
+        );
+    });
+});
+
+describe('verbose option', () => {
+    test('respects verbose option - true', async () => {
+        createSrcBundle(2);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            verbose: true,
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        await compiler.run();
+
+        createSrcBundle(1);
+
+        await compiler.run();
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+            'clean-webpack-plugin: removed dist/1.bundle.js',
+        );
+    });
+
+    test('respects verbose option - false', async () => {
+        createSrcBundle(2);
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            verbose: false,
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        await compiler.run();
+        createSrcBundle(1);
+        await compiler.run();
+
+        expect(consoleSpy).not.toHaveBeenCalled();
+    });
+});
+
 describe('webpack errors', () => {
     test('does nothing when webpack errors are present', async () => {
         createSrcBundle(2);
-
-        const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
-        expect(initialBuildFiles).toEqual([
-            '.hidden.file',
-            'static1.js',
-            'static2.txt',
-        ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             verbose: true,
@@ -684,11 +771,8 @@ describe('webpack errors', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
             '1.bundle.js',
             'bundle.js',
-            'static1.js',
-            'static2.txt',
         ]);
 
         expect(consoleSpy.mock.calls).toEqual([]);
@@ -713,11 +797,8 @@ describe('webpack errors', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
             '1.bundle.js',
             'bundle.js',
-            'static1.js',
-            'static2.txt',
         ]);
     });
 
@@ -750,6 +831,7 @@ describe('webpack >= 4 only', () => {
     if (webpackMajor !== null && webpackMajor >= 4) {
         test('works without config', async () => {
             createSrcBundle(2);
+            createStaticFiles();
 
             const cleanWebpackPlugin = new CleanWebpackPlugin();
 
@@ -776,11 +858,26 @@ describe('webpack >= 4 only', () => {
             expect(cleanWebpackPlugin.currentAssets).toEqual(['main.js']);
 
             expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-                '.hidden.file',
                 'main.js',
-                'static1.js',
-                'static2.txt',
             ]);
         });
     }
+});
+
+describe('detect old options', () => {
+    test('throws if options is a string', () => {
+        expect(() => CleanWebpackPlugin('dist'))
+            .toThrowErrorMatchingInlineSnapshot(`
+"clean-webpack-plugin only accepts an options object. See: 
+            https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional"
+`);
+    });
+
+    test('throws if options is an array', () => {
+        expect(() => CleanWebpackPlugin(['dist']))
+            .toThrowErrorMatchingInlineSnapshot(`
+"clean-webpack-plugin only accepts an options object. See: 
+            https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional"
+`);
+    });
 });
