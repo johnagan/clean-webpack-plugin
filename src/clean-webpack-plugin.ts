@@ -5,34 +5,49 @@ import del from 'del';
 interface Options {
     /**
      * Simulate the removal of files
+     *
+     * default: false
      */
     dry: boolean;
 
     /**
-     * console.warn removed files
+     * Write Logs to Console
+     * (Always enabled when dry is true)
+     *
+     * default: false
      */
     verbose: boolean;
 
     /**
-     * File patterns to files after webpack has been successfully ran
+     * Custom pattern matching
      *
-     * use !negative patterns to exclude files
+     * Removes files after every build (including watch mode) that match this pattern.
+     * Used for files that are not created directly by Webpack.
      *
-     * See https://github.com/sindresorhus/del#patterns
+     * Use !negative patterns to exclude files
+     *
+     * default: disabled
      */
     customPatterns: string[];
 
     /**
-     * Remove files once prior to compilation
+     * Removes files once prior to Webpack compilation
+     *   Not included in rebuilds (watch mode)
      *
-     * use !negative patterns to exclude files
+     * NOTE: customPatterns are included with this
      *
-     * See https://github.com/sindresorhus/del#patterns
+     * Use !negative patterns to exclude files
+     *
+     * default: ['**']
      */
     initialPatterns: string[];
 
     /**
      * Allow clean patterns outside of process.cwd()
+     *
+     * requires dry option to be explicitly set
+     *
+     * default: false
      */
     dangerouslyAllowCleanPatternsOutsideProject: boolean;
 }
