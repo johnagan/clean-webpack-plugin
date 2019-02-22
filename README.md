@@ -19,6 +19,12 @@
 
 A webpack plugin to remove/clean your build folder(s).
 
+> NOTE: Node v6+ and Webpack v2+ are supported and tested.
+
+## About
+
+By default, this plugin will remove all files inside webpack's `output.path` directory, as well as all unused webpack assets after every successful rebuild.
+
 ## Installation
 
 `npm install --save-dev clean-webpack-plugin`
@@ -38,7 +44,7 @@ const webpackConfig = {
 module.exports = webpackConfig;
 ```
 
-### Options and Defaults (Optional)
+## Options and Defaults (Optional)
 
 ```js
 new CleanWebpackPlugin({
@@ -75,6 +81,7 @@ new CleanWebpackPlugin({
 
     /**
      * Removes files once prior to Webpack compilation
+     *   Not included in rebuilds (watch mode)
      *
      * NOTE: customPatterns are included with this
      *
@@ -88,7 +95,7 @@ new CleanWebpackPlugin({
     /**
      * Custom pattern matching
      *
-     * Removes files on after every build (watch mode) that match this pattern.
+     * Removes files after every build (including watch mode) that match this pattern.
      * Used for files that are not created directly by Webpack.
      *
      * Use !negative patterns to exclude files
@@ -105,6 +112,7 @@ new CleanWebpackPlugin({
      * default: false
      */
     dangerouslyAllowCleanPatternsOutsideProject: true,
+    dry: true,
 });
 ```
 
@@ -116,9 +124,17 @@ This is a modified version of [WebPack's Plugin documentation](https://webpack.j
 const CleanWebpackPlugin = require('clean-webpack-plugin'); // installed via npm
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // installed via npm
 const webpack = require('webpack'); // to access built-in plugins
+const path = require('path');
 
 module.exports = {
     entry: './path/to/my/entry/file.js',
+    output: {
+        /**
+         * With zero configuration,
+         *   clean-webpack-plugin will remove files inside the directory below
+         */
+        path: path.resolve(process.cwd(), 'dist'),
+    },
     module: {
         rules: [
             {
