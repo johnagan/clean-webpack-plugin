@@ -535,7 +535,6 @@ describe('customPatterns option', () => {
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
             '1.bundle.js',
             'bundle.js',
-            'static1.js',
         ]);
 
         createSrcBundle(1);
@@ -593,7 +592,8 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            customPatterns: [path.join(sandbox.dir, 'build/**')],
+            // Use initialPatterns because webpack 2/3 doesn't handle errors in done lifecycle correctly
+            initialPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
         const compiler = webpack({

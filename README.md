@@ -83,8 +83,6 @@ new CleanWebpackPlugin({
      * Removes files once prior to Webpack compilation
      *   Not included in rebuilds (watch mode)
      *
-     * NOTE: customPatterns are included with this
-     *
      * Use !negative patterns to exclude files
      *
      * default: ['**']

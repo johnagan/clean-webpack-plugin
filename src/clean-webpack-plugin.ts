@@ -34,8 +34,6 @@ interface Options {
      * Removes files once prior to Webpack compilation
      *   Not included in rebuilds (watch mode)
      *
-     * NOTE: customPatterns are included with this
-     *
      * Use !negative patterns to exclude files
      *
      * default: ['**']
@@ -180,7 +178,7 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        this.removeFiles([...this.initialPatterns, ...this.customPatterns]);
+        this.removeFiles(this.initialPatterns);
     }
 
     handleDone(stats: Stats) {
