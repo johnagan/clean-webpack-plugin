@@ -34,7 +34,7 @@ interface Options {
     /**
      * Allow clean patterns outside of process.cwd()
      */
-    allowExternal: boolean;
+    dangerouslyAllowCleanPatternsOutsideProject: boolean;
 }
 
 class CleanWebpackPlugin {
@@ -42,7 +42,7 @@ class CleanWebpackPlugin {
     private readonly verbose: boolean;
     private readonly customPatterns: string[];
     private readonly initialPatterns: string[];
-    private readonly allowExternal: boolean;
+    private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
@@ -51,6 +51,13 @@ class CleanWebpackPlugin {
         if (typeof options !== 'object' || Array.isArray(options) === true) {
             throw new Error(`clean-webpack-plugin only accepts an options object. See: 
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
+        }
+
+        // @ts-ignore
+        if (options.allowExternal) {
+            throw new Error(
+                'clean-webpack-plugin: `allowExternal` option no longer supported. Use `dangerouslyAllowCleanPatternsOutsideProject`',
+            );
         }
 
         this.dry = options.dry === true || false;
@@ -65,7 +72,9 @@ class CleanWebpackPlugin {
             ? options.initialPatterns
             : ['**'];
 
-        this.allowExternal = options.allowExternal === true || false;
+        this.dangerouslyAllowCleanPatternsOutsideProject =
+            options.dangerouslyAllowCleanPatternsOutsideProject === true ||
+            false;
 
         /**
          * Store webpack build assets
@@ -198,7 +207,7 @@ class CleanWebpackPlugin {
     removeFiles(patterns: string[]) {
         try {
             const deleted = del.sync(patterns, {
-                force: this.allowExternal,
+                force: this.dangerouslyAllowCleanPatternsOutsideProject,
                 // Change context to build directory
                 cwd: this.outputPath,
                 dryRun: this.dry,
@@ -232,7 +241,7 @@ class CleanWebpackPlugin {
 
             if (needsForce) {
                 const message =
-                    'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `allowExternal` option.';
+                    'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `dangerouslyAllowCleanPatternsOutsideProject` option.';
 
                 throw new Error(message);
             }

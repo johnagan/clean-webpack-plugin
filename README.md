@@ -104,7 +104,7 @@ new CleanWebpackPlugin({
      *
      * default: false
      */
-    allowExternal: true,
+    dangerouslyAllowCleanPatternsOutsideProject: true,
 });
 ```
 
