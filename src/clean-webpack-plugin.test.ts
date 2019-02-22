@@ -581,8 +581,8 @@ describe('customPatterns option', () => {
     });
 });
 
-describe('allowExternal option', () => {
-    test('will not files outside of process.cwd(), allowExternal: false (by default)', async () => {
+describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
+    test('will not files outside of process.cwd(), dangerouslyAllowCleanPatternsOutsideProject: false (by default)', async () => {
         process.chdir(cwd);
         createSrcBundle(1);
 
@@ -607,11 +607,11 @@ describe('allowExternal option', () => {
         });
 
         await expect(compiler.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the \`allowExternal\` option."`,
+            `"clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the \`dangerouslyAllowCleanPatternsOutsideProject\` option."`,
         );
     });
 
-    test('removes files outside of process.cwd() with allowExternal: true', async () => {
+    test('removes files outside of process.cwd() with dangerouslyAllowCleanPatternsOutsideProject: true', async () => {
         process.chdir(cwd);
         createSrcBundle(1);
 
@@ -622,7 +622,7 @@ describe('allowExternal option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            allowExternal: true,
+            dangerouslyAllowCleanPatternsOutsideProject: true,
             customPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
@@ -879,5 +879,13 @@ describe('detect old options', () => {
 "clean-webpack-plugin only accepts an options object. See: 
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional"
 `);
+    });
+
+    test('allowExternal', () => {
+        expect(() =>
+            CleanWebpackPlugin({ allowExternal: true }),
+        ).toThrowErrorMatchingInlineSnapshot(
+            `"clean-webpack-plugin: \`allowExternal\` option no longer supported. Use \`dangerouslyAllowCleanPatternsOutsideProject\`"`,
+        );
     });
 });
