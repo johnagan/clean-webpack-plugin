@@ -60,9 +60,28 @@ class CleanWebpackPlugin {
             );
         }
 
-        this.dry = options.dry === true || false;
-        this.verbose =
-            options.dry === true || options.verbose === true || false;
+        if (
+            options.dangerouslyAllowCleanPatternsOutsideProject === true &&
+            options.dry !== true &&
+            options.dry !== false
+        ) {
+            // eslint-disable-next-line no-console
+            console.warn(
+                'clean-webpack-plugin: dangerouslyAllowCleanPatternsOutsideProject requires dry: false to be explicitly set. Enabling dry mode',
+            );
+        }
+
+        this.dangerouslyAllowCleanPatternsOutsideProject =
+            options.dangerouslyAllowCleanPatternsOutsideProject === true ||
+            false;
+
+        this.dry =
+            options.dry === true || options.dry === false
+                ? options.dry
+                : this.dangerouslyAllowCleanPatternsOutsideProject === true ||
+                  false;
+
+        this.verbose = this.dry === true || options.verbose === true || false;
 
         this.customPatterns = Array.isArray(options.customPatterns)
             ? options.customPatterns
@@ -71,10 +90,6 @@ class CleanWebpackPlugin {
         this.initialPatterns = Array.isArray(options.initialPatterns)
             ? options.initialPatterns
             : ['**'];
-
-        this.dangerouslyAllowCleanPatternsOutsideProject =
-            options.dangerouslyAllowCleanPatternsOutsideProject === true ||
-            false;
 
         /**
          * Store webpack build assets

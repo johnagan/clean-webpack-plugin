@@ -623,8 +623,11 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
+            dry: false,
             customPatterns: [path.join(sandbox.dir, 'build/**')],
         });
+
+        expect(consoleSpy.mock.calls).toEqual([]);
 
         const compiler = webpack({
             entry: entryFileFull,
@@ -639,6 +642,33 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         await compiler.run();
 
         expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
+    });
+
+    test('dangerouslyAllowCleanPatternsOutsideProject: true require dry to be explicitly set', async () => {
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            dangerouslyAllowCleanPatternsOutsideProject: true,
+        });
+
+        expect(cleanWebpackPlugin.dry).toEqual(true);
+        expect(cleanWebpackPlugin.verbose).toEqual(true);
+        expect(consoleSpy.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "clean-webpack-plugin: dangerouslyAllowCleanPatternsOutsideProject requires dry: false to be explicitly set. Enabling dry mode",
+  ],
+]
+`);
+    });
+
+    test('dangerouslyAllowCleanPatternsOutsideProject: true dry: true', async () => {
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            dangerouslyAllowCleanPatternsOutsideProject: true,
+            dry: true,
+        });
+
+        expect(cleanWebpackPlugin.dry).toEqual(true);
+        expect(cleanWebpackPlugin.verbose).toEqual(true);
+        expect(consoleSpy.mock.calls).toEqual([]);
     });
 });
 

@@ -84,7 +84,6 @@ new CleanWebpackPlugin({
      */
     initialPatterns: ['**', '!static-files*'],
     initialPatterns: [], // disables initialPatterns
-    cleanBeforeBuildPatterns: [],
 
     /**
      * Custom pattern matching
@@ -97,10 +96,11 @@ new CleanWebpackPlugin({
      * default: disabled
      */
     customPatterns: ['static*.*', '!static1.js'],
-    cleanAfterBuildPatterns: [],
 
     /**
      * Allow clean patterns outside of process.cwd()
+     *
+     * requires dry option to be explicitly set
      *
      * default: false
      */
