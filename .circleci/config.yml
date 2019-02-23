@@ -1,0 +1,66 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+# Caching environmental variable workaround:
+# https://discuss.circleci.com/t/cannot-use-circle-yml-environment-variables-in-cache-keys/10994/9
+#
+
+version: 2
+jobs:
+    test-node6:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - run: node --version > _node_version && npm --version > _npm_version && cat _node_version && cat _npm_version
+            - restore_cache:
+                  keys:
+                      - v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: node --version && npm --version
+            - run: npm install
+            - save_cache:
+                  paths:
+                      - ~/.npm
+                  key: v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: npm run test.ci
+    test-node8:
+        docker:
+            - image: circleci/node:8
+        steps:
+            - checkout
+            - run: node --version > _node_version && npm --version > _npm_version && cat _node_version && cat _npm_version
+            - restore_cache:
+                  keys:
+                      - v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: node --version && npm --version
+            - run: npm install
+            - save_cache:
+                  paths:
+                      - ~/.npm
+                  key: v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: npm run test.ci
+    test-node10:
+        docker:
+            - image: circleci/node:10
+        steps:
+            - checkout
+            - run: node --version > _node_version && npm --version > _npm_version && cat _node_version && cat _npm_version
+            - restore_cache:
+                  keys:
+                      - v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: node --version && npm --version
+            - run: npm install
+            - save_cache:
+                  paths:
+                      - ~/.npm
+                  key: v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: npm run test.ci
+
+workflows:
+    version: 2
+    build_and_test:
+        jobs:
+            - test-node6
+            - test-node8
+            - test-node10

@@ -2,7 +2,7 @@
 
 [![npm][npm-image]][npm-url]
 [![MIT License][mit-license-image]][mit-license-url]
-[![Linux Build Status][travis-image]][travis-url]
+[![Linux Build Status][circleci-image]][circleci-url]
 [![Windows Build Status][appveyor-image]][appveyor-url]
 [![Coveralls Status][coveralls-image]][coveralls-url]
 
@@ -10,8 +10,8 @@
 [npm-image]: https://img.shields.io/npm/v/clean-webpack-plugin.svg?label=npm%20version
 [mit-license-url]: LICENSE
 [mit-license-image]: https://camo.githubusercontent.com/d59450139b6d354f15a2252a47b457bb2cc43828/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f6c2f7365727665726c6573732e737667
-[travis-url]: https://travis-ci.org/johnagan/clean-webpack-plugin
-[travis-image]: https://img.shields.io/travis/johnagan/clean-webpack-plugin/master.svg?label=linux%20build
+[circleci-url]: https://circleci.com/gh/johnagan/clean-webpack-plugin/tree/master
+[circleci-image]: https://img.shields.io/circleci/project/github/johnagan/clean-webpack-plugin/master.svg?label=linux%20build
 [appveyor-url]: https://ci.appveyor.com/project/johnagan/clean-webpack-plugin/branch/master
 [appveyor-image]: https://img.shields.io/appveyor/ci/johnagan/clean-webpack-plugin/master.svg?label=windows%20build
 [coveralls-url]: https://codecov.io/gh/johnagan/clean-webpack-plugin/branch/master
