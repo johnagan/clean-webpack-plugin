@@ -19,8 +19,6 @@ interface Options {
     verbose: boolean;
 
     /**
-     * Custom pattern matching
-     *
      * Removes files after every build (including watch mode) that match this pattern.
      * Used for files that are not created directly by Webpack.
      *
@@ -28,7 +26,7 @@ interface Options {
      *
      * default: disabled
      */
-    customPatterns: string[];
+    cleanAfterEveryBuildPatterns: string[];
 
     /**
      * Removes files once prior to Webpack compilation
@@ -38,7 +36,7 @@ interface Options {
      *
      * default: ['**']
      */
-    initialPatterns: string[];
+    cleanOnceBeforeBuildPatterns: string[];
 
     /**
      * Allow clean patterns outside of process.cwd()
@@ -53,8 +51,8 @@ interface Options {
 class CleanWebpackPlugin {
     private readonly dry: boolean;
     private readonly verbose: boolean;
-    private readonly customPatterns: string[];
-    private readonly initialPatterns: string[];
+    private readonly cleanAfterEveryBuildPatterns: string[];
+    private readonly cleanOnceBeforeBuildPatterns: string[];
     private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
     private currentAssets: string[];
     private initialClean: boolean;
@@ -96,12 +94,16 @@ class CleanWebpackPlugin {
 
         this.verbose = this.dry === true || options.verbose === true || false;
 
-        this.customPatterns = Array.isArray(options.customPatterns)
-            ? options.customPatterns
+        this.cleanAfterEveryBuildPatterns = Array.isArray(
+            options.cleanAfterEveryBuildPatterns,
+        )
+            ? options.cleanAfterEveryBuildPatterns
             : [];
 
-        this.initialPatterns = Array.isArray(options.initialPatterns)
-            ? options.initialPatterns
+        this.cleanOnceBeforeBuildPatterns = Array.isArray(
+            options.cleanOnceBeforeBuildPatterns,
+        )
+            ? options.cleanOnceBeforeBuildPatterns
             : ['**'];
 
         /**
@@ -110,7 +112,7 @@ class CleanWebpackPlugin {
         this.currentAssets = [];
 
         /**
-         * Only used with initialPatterns
+         * Only used with cleanOnceBeforeBuildPatterns
          */
         this.initialClean = false;
 
@@ -141,7 +143,7 @@ class CleanWebpackPlugin {
          */
         const hooks = compiler.hooks;
 
-        if (this.initialPatterns.length !== 0) {
+        if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
             if (hooks) {
                 hooks.compile.tap('clean-webpack-plugin', () => {
                     this.handleInitial();
@@ -178,7 +180,7 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        this.removeFiles(this.initialPatterns);
+        this.removeFiles(this.cleanOnceBeforeBuildPatterns);
     }
 
     handleDone(stats: Stats) {
@@ -220,16 +222,19 @@ class CleanWebpackPlugin {
         this.currentAssets = assets.sort();
 
         /**
-         * Do nothing if there aren't any files to delete and customPatterns is not defined
+         * Do nothing if there aren't any files to delete and cleanAfterEveryBuildPatterns is not defined
          */
-        if (staleFiles.length === 0 && this.customPatterns.length === 0) {
+        if (
+            staleFiles.length === 0 &&
+            this.cleanAfterEveryBuildPatterns.length === 0
+        ) {
             return;
         }
 
         /**
          * Merge customPatters with stale files.
          */
-        this.removeFiles([...staleFiles, ...this.customPatterns]);
+        this.removeFiles([...staleFiles, ...this.cleanAfterEveryBuildPatterns]);
     }
 
     removeFiles(patterns: string[]) {

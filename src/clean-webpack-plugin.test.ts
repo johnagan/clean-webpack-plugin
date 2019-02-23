@@ -269,13 +269,13 @@ test('removes map files', async () => {
     ]);
 });
 
-describe('initialPatterns option', () => {
+describe('cleanOnceBeforeBuildPatterns option', () => {
     test('does nothing when nothing changes or files added but not removed', async () => {
         createSrcBundle(1);
         createStaticFiles();
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: [],
+            cleanOnceBeforeBuildPatterns: [],
         });
 
         const removeFilesSpy = jest.spyOn(cleanWebpackPlugin, 'removeFiles');
@@ -327,7 +327,7 @@ describe('initialPatterns option', () => {
         expect(removeFilesSpy).not.toHaveBeenCalled();
     });
 
-    test('only calls once initialPatterns once', async () => {
+    test('only calls once cleanOnceBeforeBuildPatterns once', async () => {
         createSrcBundle(1);
         createStaticFiles();
 
@@ -339,7 +339,7 @@ describe('initialPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: ['**'],
+            cleanOnceBeforeBuildPatterns: ['**'],
         });
 
         const compiler = webpack({
@@ -374,7 +374,7 @@ describe('initialPatterns option', () => {
         ]);
     });
 
-    test('overrides default initialPatterns', async () => {
+    test('overrides default cleanOnceBeforeBuildPatterns', async () => {
         createSrcBundle(1);
         createStaticFiles();
 
@@ -386,7 +386,7 @@ describe('initialPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: ['static2.txt'],
+            cleanOnceBeforeBuildPatterns: ['static2.txt'],
         });
 
         const compiler = webpack({
@@ -437,7 +437,7 @@ describe('initialPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: ['**', '!static2.*'],
+            cleanOnceBeforeBuildPatterns: ['**', '!static2.*'],
         });
 
         const compiler = webpack({
@@ -475,7 +475,7 @@ describe('initialPatterns option', () => {
         ]);
     });
 
-    test('handles the initialPatterns outside of build directory', async () => {
+    test('handles the cleanOnceBeforeBuildPatterns outside of build directory', async () => {
         createSrcBundle(1);
 
         const outsideDistPath = 'build';
@@ -485,7 +485,7 @@ describe('initialPatterns option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            initialPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanOnceBeforeBuildPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
         const compiler = webpack({
@@ -504,13 +504,13 @@ describe('initialPatterns option', () => {
     });
 });
 
-describe('customPatterns option', () => {
-    test('removes with customPatterns', async () => {
+describe('cleanAfterEveryBuildPatterns option', () => {
+    test('removes with cleanAfterEveryBuildPatterns', async () => {
         createSrcBundle(2);
         createStaticFiles();
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            customPatterns: ['static*.*', '!static1.js'],
+            cleanAfterEveryBuildPatterns: ['static*.*', '!static1.js'],
         });
 
         const compiler = webpack({
@@ -551,7 +551,7 @@ describe('customPatterns option', () => {
         ]);
     });
 
-    test('handles the customPatterns outside of webpack output directory', async () => {
+    test('handles the cleanAfterEveryBuildPatterns outside of webpack output directory', async () => {
         createSrcBundle(1);
 
         const outsideDistPath = 'build';
@@ -561,7 +561,7 @@ describe('customPatterns option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            customPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanAfterEveryBuildPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
         const compiler = webpack({
@@ -592,8 +592,8 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            // Use initialPatterns because webpack 2/3 doesn't handle errors in done lifecycle correctly
-            initialPatterns: [path.join(sandbox.dir, 'build/**')],
+            // Use cleanOnceBeforeBuildPatterns because webpack 2/3 doesn't handle errors in done lifecycle correctly
+            cleanOnceBeforeBuildPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
         const compiler = webpack({
@@ -624,7 +624,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
             dry: false,
-            customPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanAfterEveryBuildPatterns: [path.join(sandbox.dir, 'build/**')],
         });
 
         expect(consoleSpy.mock.calls).toEqual([]);

@@ -87,12 +87,10 @@ new CleanWebpackPlugin({
      *
      * default: ['**']
      */
-    initialPatterns: ['**', '!static-files*'],
-    initialPatterns: [], // disables initialPatterns
+    cleanOnceBeforeBuildPatterns: ['**', '!static-files*'],
+    cleanOnceBeforeBuildPatterns: [], // disables cleanOnceBeforeBuildPatterns
 
     /**
-     * Custom pattern matching
-     *
      * Removes files after every build (including watch mode) that match this pattern.
      * Used for files that are not created directly by Webpack.
      *
@@ -100,7 +98,7 @@ new CleanWebpackPlugin({
      *
      * default: disabled
      */
-    customPatterns: ['static*.*', '!static1.js'],
+    cleanAfterEveryBuildPatterns: ['static*.*', '!static1.js'],
 
     /**
      * Allow clean patterns outside of process.cwd()
