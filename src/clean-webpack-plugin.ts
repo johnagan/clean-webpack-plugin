@@ -1,6 +1,6 @@
 import { Compiler, Stats } from 'webpack';
 import path from 'path';
-import del from 'del';
+import del, { Options as DelOptions } from 'del';
 
 interface Options {
     /**
@@ -222,22 +222,24 @@ class CleanWebpackPlugin {
         this.currentAssets = assets.sort();
 
         /**
-         * Do nothing if there aren't any files to delete and cleanAfterEveryBuildPatterns is not defined
+         * Remove unused webpack assets
          */
-        if (
-            staleFiles.length === 0 &&
-            this.cleanAfterEveryBuildPatterns.length === 0
-        ) {
-            return;
+        if (staleFiles.length !== 0) {
+            this.removeFiles(staleFiles);
         }
 
         /**
-         * Merge customPatters with stale files.
+         * Run cleanAfterEveryBuildPatterns
          */
-        this.removeFiles([...staleFiles, ...this.cleanAfterEveryBuildPatterns]);
+        if (this.cleanAfterEveryBuildPatterns.length !== 0) {
+            this.removeFiles(this.cleanAfterEveryBuildPatterns, {
+                // Never remove current webpack assets
+                ignore: this.currentAssets,
+            });
+        }
     }
 
-    removeFiles(patterns: string[]) {
+    removeFiles(patterns: string[], delOptions: DelOptions = {}) {
         try {
             const deleted = del.sync(patterns, {
                 force: this.dangerouslyAllowCleanPatternsOutsideProject,
@@ -245,6 +247,7 @@ class CleanWebpackPlugin {
                 cwd: this.outputPath,
                 dryRun: this.dry,
                 dot: true,
+                ...delOptions,
             });
 
             /**
