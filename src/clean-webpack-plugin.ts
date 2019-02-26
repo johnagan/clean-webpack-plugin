@@ -1,6 +1,6 @@
 import { Compiler, Stats } from 'webpack';
 import path from 'path';
-import del, { Options as DelOptions } from 'del';
+import del from 'del';
 
 interface Options {
     /**
@@ -24,6 +24,13 @@ interface Options {
      * default: true
      */
     cleanStaleWebpackAssets: boolean;
+
+    /**
+     * Do not allow removal of current webpack assets
+     *
+     * default: true
+     */
+    protectWebpackAssets: boolean;
 
     /**
      * Removes files after every build (including watch mode) that match this pattern.
@@ -59,6 +66,7 @@ class CleanWebpackPlugin {
     private readonly dry: boolean;
     private readonly verbose: boolean;
     private readonly cleanStaleWebpackAssets: boolean;
+    private readonly protectWebpackAssets: boolean;
     private readonly cleanAfterEveryBuildPatterns: string[];
     private readonly cleanOnceBeforeBuildPatterns: string[];
     private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
@@ -106,6 +114,12 @@ class CleanWebpackPlugin {
             options.cleanStaleWebpackAssets === true ||
             options.cleanStaleWebpackAssets === false
                 ? options.cleanStaleWebpackAssets
+                : true;
+
+        this.protectWebpackAssets =
+            options.protectWebpackAssets === true ||
+            options.protectWebpackAssets === false
+                ? options.protectWebpackAssets
                 : true;
 
         this.cleanAfterEveryBuildPatterns = Array.isArray(
@@ -246,14 +260,11 @@ class CleanWebpackPlugin {
          * Run cleanAfterEveryBuildPatterns
          */
         if (this.cleanAfterEveryBuildPatterns.length !== 0) {
-            this.removeFiles(this.cleanAfterEveryBuildPatterns, {
-                // Never remove current webpack assets
-                ignore: this.currentAssets,
-            });
+            this.removeFiles(this.cleanAfterEveryBuildPatterns);
         }
     }
 
-    removeFiles(patterns: string[], delOptions: DelOptions = {}) {
+    removeFiles(patterns: string[]) {
         try {
             const deleted = del.sync(patterns, {
                 force: this.dangerouslyAllowCleanPatternsOutsideProject,
@@ -261,7 +272,7 @@ class CleanWebpackPlugin {
                 cwd: this.outputPath,
                 dryRun: this.dry,
                 dot: true,
-                ...delOptions,
+                ignore: this.protectWebpackAssets ? this.currentAssets : [],
             });
 
             /**

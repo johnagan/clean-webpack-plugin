@@ -71,6 +71,13 @@ new CleanWebpackPlugin({
     cleanStaleWebpackAssets: false,
 
     /**
+     * Do not allow removal of current webpack assets
+     *
+     * default: true
+     */
+    protectWebpackAssets: false,
+
+    /**
      * **WARNING**
      *
      * Notes for the below options:
