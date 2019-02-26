@@ -64,6 +64,13 @@ new CleanWebpackPlugin({
     verbose: true,
 
     /**
+     * Automatically remove all unused webpack assets on rebuild
+     *
+     * default: true
+     */
+    cleanStaleWebpackAssets: false,
+
+    /**
      * **WARNING**
      *
      * Notes for the below options:

@@ -269,6 +269,117 @@ test('removes map files', async () => {
     ]);
 });
 
+describe('cleanStaleWebpackAssets option', () => {
+    test('does not remove assets when false', async () => {
+        createSrcBundle(2);
+        createStaticFiles();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false,
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        createSrcBundle(1);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+    });
+
+    test('removes assets when true', async () => {
+        createSrcBundle(2);
+        createStaticFiles();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: true,
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        createSrcBundle(1);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+    });
+
+    test('removes assets by default', async () => {
+        createSrcBundle(2);
+        createStaticFiles();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin();
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        createSrcBundle(1);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+    });
+});
+
 describe('cleanOnceBeforeBuildPatterns option', () => {
     test('does nothing when nothing changes or files added but not removed', async () => {
         createSrcBundle(1);

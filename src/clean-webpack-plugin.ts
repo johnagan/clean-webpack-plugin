@@ -19,6 +19,13 @@ interface Options {
     verbose: boolean;
 
     /**
+     * Automatically remove all unused webpack assets on rebuild
+     *
+     * default: true
+     */
+    cleanStaleWebpackAssets: boolean;
+
+    /**
      * Removes files after every build (including watch mode) that match this pattern.
      * Used for files that are not created directly by Webpack.
      *
@@ -51,6 +58,7 @@ interface Options {
 class CleanWebpackPlugin {
     private readonly dry: boolean;
     private readonly verbose: boolean;
+    private readonly cleanStaleWebpackAssets: boolean;
     private readonly cleanAfterEveryBuildPatterns: string[];
     private readonly cleanOnceBeforeBuildPatterns: string[];
     private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
@@ -93,6 +101,12 @@ class CleanWebpackPlugin {
                   false;
 
         this.verbose = this.dry === true || options.verbose === true || false;
+
+        this.cleanStaleWebpackAssets =
+            options.cleanStaleWebpackAssets === true ||
+            options.cleanStaleWebpackAssets === false
+                ? options.cleanStaleWebpackAssets
+                : true;
 
         this.cleanAfterEveryBuildPatterns = Array.isArray(
             options.cleanAfterEveryBuildPatterns,
@@ -224,7 +238,7 @@ class CleanWebpackPlugin {
         /**
          * Remove unused webpack assets
          */
-        if (staleFiles.length !== 0) {
+        if (this.cleanStaleWebpackAssets === true && staleFiles.length !== 0) {
             this.removeFiles(staleFiles);
         }
 
