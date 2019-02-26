@@ -33,16 +33,6 @@ interface Options {
     protectWebpackAssets: boolean;
 
     /**
-     * Removes files after every build (including watch mode) that match this pattern.
-     * Used for files that are not created directly by Webpack.
-     *
-     * Use !negative patterns to exclude files
-     *
-     * default: disabled
-     */
-    cleanAfterEveryBuildPatterns: string[];
-
-    /**
      * Removes files once prior to Webpack compilation
      *   Not included in rebuilds (watch mode)
      *
@@ -51,6 +41,16 @@ interface Options {
      * default: ['**']
      */
     cleanOnceBeforeBuildPatterns: string[];
+
+    /**
+     * Removes files after every build (including watch mode) that match this pattern.
+     * Used for files that are not created directly by Webpack.
+     *
+     * Use !negative patterns to exclude files
+     *
+     * default: disabled
+     */
+    cleanAfterEveryBuildPatterns: string[];
 
     /**
      * Allow clean patterns outside of process.cwd()
