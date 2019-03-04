@@ -593,7 +593,7 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: ['**'],
+            cleanOnceBeforeBuildPatterns: ['**/*'],
         });
 
         const compiler = webpack({
@@ -691,7 +691,7 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: ['**', '!static2.*'],
+            cleanOnceBeforeBuildPatterns: ['**/*', '!static2.*'],
         });
 
         const compiler = webpack({
@@ -739,7 +739,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanOnceBeforeBuildPatterns: [
+                path.join(sandbox.dir, 'build/**/*'),
+            ],
         });
 
         const compiler = webpack({
@@ -862,7 +864,9 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         expect(initialOutsideFiles).toEqual(['outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
-            cleanAfterEveryBuildPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanAfterEveryBuildPatterns: [
+                path.join(sandbox.dir, 'build/**/*'),
+            ],
         });
 
         const compiler = webpack({
@@ -894,7 +898,9 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             // Use cleanOnceBeforeBuildPatterns because webpack 2/3 doesn't handle errors in done lifecycle correctly
-            cleanOnceBeforeBuildPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanOnceBeforeBuildPatterns: [
+                path.join(sandbox.dir, 'build/**/*'),
+            ],
         });
 
         const compiler = webpack({
@@ -925,7 +931,9 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
             dry: false,
-            cleanAfterEveryBuildPatterns: [path.join(sandbox.dir, 'build/**')],
+            cleanAfterEveryBuildPatterns: [
+                path.join(sandbox.dir, 'build/**/*'),
+            ],
         });
 
         expect(consoleSpy.mock.calls).toEqual([]);
@@ -1199,7 +1207,7 @@ describe('detect old options', () => {
     test('throws if options is a string', () => {
         expect(() => CleanWebpackPlugin('dist'))
             .toThrowErrorMatchingInlineSnapshot(`
-"clean-webpack-plugin only accepts an options object. See: 
+"clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional"
 `);
     });
@@ -1207,7 +1215,7 @@ describe('detect old options', () => {
     test('throws if options is an array', () => {
         expect(() => CleanWebpackPlugin(['dist']))
             .toThrowErrorMatchingInlineSnapshot(`
-"clean-webpack-plugin only accepts an options object. See: 
+"clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional"
 `);
     });

@@ -1,6 +1,6 @@
 import { Compiler, Stats } from 'webpack';
 import path from 'path';
-import del from 'del';
+import { sync as delSync } from 'del';
 
 interface Options {
     /**
@@ -38,7 +38,7 @@ interface Options {
      *
      * Use !negative patterns to exclude files
      *
-     * default: ['**']
+     * default: ['**\/*']
      */
     cleanOnceBeforeBuildPatterns: string[];
 
@@ -76,7 +76,7 @@ class CleanWebpackPlugin {
 
     constructor(options: Partial<Options> = {}) {
         if (typeof options !== 'object' || Array.isArray(options) === true) {
-            throw new Error(`clean-webpack-plugin only accepts an options object. See: 
+            throw new Error(`clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
         }
 
@@ -132,7 +132,7 @@ class CleanWebpackPlugin {
             options.cleanOnceBeforeBuildPatterns,
         )
             ? options.cleanOnceBeforeBuildPatterns
-            : ['**'];
+            : ['**/*'];
 
         /**
          * Store webpack build assets
@@ -266,7 +266,7 @@ class CleanWebpackPlugin {
 
     removeFiles(patterns: string[]) {
         try {
-            const deleted = del.sync(patterns, {
+            const deleted = delSync(patterns, {
                 force: this.dangerouslyAllowCleanPatternsOutsideProject,
                 // Change context to build directory
                 cwd: this.outputPath,
