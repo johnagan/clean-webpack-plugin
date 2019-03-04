@@ -14,10 +14,6 @@ const babel = {
         ],
         '@babel/preset-typescript',
     ],
-    plugins: [
-        '@babel/plugin-proposal-class-properties',
-        '@babel/plugin-transform-strict-mode',
-    ],
     overrides: [
         {
             test: ['./src/clean-webpack-plugin.ts'],

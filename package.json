@@ -27,7 +27,7 @@
     "url": "https://github.com/johnagan/clean-webpack-plugin/issues"
   },
   "scripts": {
-    "clean": "del-cli --dot=true \"./dist/*\"",
+    "clean": "del-cli --dot=true \"./dist/**/*\"",
     "build": "npm run clean && npm run build.compile && npm run build.types",
     "build.compile": "cross-env NODE_ENV=production babel src -d dist --verbose --extensions .ts --ignore */**/*.d.ts,**/**/*.test.ts --source-maps",
     "build.types": "cross-env NODE_ENV=production tsc --project tsconfig.types.json",
@@ -51,8 +51,6 @@
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-transform-strict-mode": "^7.2.0",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-typescript": "^7.3.3",
     "@chrisblossom/eslint-config": "^4.0.10",
