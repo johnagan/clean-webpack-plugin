@@ -1023,7 +1023,7 @@ describe('dry option', () => {
         ]);
 
         expect(consoleSpy).toHaveBeenCalledWith(
-            'clean-webpack-plugin: dry dist/1.bundle.js',
+            `clean-webpack-plugin: dry ${path.normalize('dist/1.bundle.js')}`,
         );
     });
 });
@@ -1053,7 +1053,9 @@ describe('verbose option', () => {
         await compiler.run();
 
         expect(consoleSpy).toHaveBeenCalledWith(
-            'clean-webpack-plugin: removed dist/1.bundle.js',
+            `clean-webpack-plugin: removed ${path.normalize(
+                'dist/1.bundle.js',
+            )}`,
         );
     });
 
