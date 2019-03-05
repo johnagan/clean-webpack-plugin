@@ -25,6 +25,8 @@ A webpack plugin to remove/clean your build folder(s).
 
 By default, this plugin will remove all files inside webpack's `output.path` directory, as well as all unused webpack assets after every successful rebuild.
 
+> Coming from `v1`? Please read about [additional v2 information](https://github.com/johnagan/clean-webpack-plugin/issues/106).
+
 ## Installation
 
 `npm install --save-dev clean-webpack-plugin`
@@ -36,7 +38,17 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const webpackConfig = {
     plugins: [
-        // See Options and Defaults
+        /**
+         * All files inside webpack's output.path directory will be removed once, but the
+         * directory itself will not be. If using webpack 4+'s default configuration,
+         * everything under <PROJECT_DIR>/dist/ will be removed.
+         * Use cleanOnceBeforeBuildPatterns to override this behavior.
+         *
+         * During rebuilds, all webpack assets that are not used anymore
+         * will be removed automatically.
+         *
+         * See `Options and Defaults` for for information
+         */
         new CleanWebpackPlugin(),
     ],
 };
