@@ -249,18 +249,24 @@ class CleanWebpackPlugin {
          */
         this.currentAssets = assets.sort();
 
+        const removePatterns = [];
+
         /**
          * Remove unused webpack assets
          */
         if (this.cleanStaleWebpackAssets === true && staleFiles.length !== 0) {
-            this.removeFiles(staleFiles);
+            removePatterns.push(...staleFiles);
         }
 
         /**
-         * Run cleanAfterEveryBuildPatterns
+         * Remove cleanAfterEveryBuildPatterns
          */
         if (this.cleanAfterEveryBuildPatterns.length !== 0) {
-            this.removeFiles(this.cleanAfterEveryBuildPatterns);
+            removePatterns.push(...this.cleanAfterEveryBuildPatterns);
+        }
+
+        if (removePatterns.length !== 0) {
+            this.removeFiles(removePatterns);
         }
     }
 

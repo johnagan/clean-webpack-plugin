@@ -854,6 +854,54 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         ]);
     });
 
+    test('does not remove stale webpack asset with negative pattern match', async () => {
+        createSrcBundle(2);
+        createStaticFiles();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            cleanAfterEveryBuildPatterns: ['!1.bundle.js'],
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        createSrcBundle(1);
+        createStaticFiles();
+
+        await compiler.run();
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '.hidden.file',
+            '1.bundle.js',
+            'bundle.js',
+            'static1.js',
+            'static2.txt',
+        ]);
+    });
+
     test('handles the cleanAfterEveryBuildPatterns outside of webpack output directory', async () => {
         createSrcBundle(1);
 
