@@ -117,8 +117,7 @@ new CleanWebpackPlugin({
     // requires dry option to be explicitly set
     //
     // default: false
-    dangerouslyAllowCleanPatternsOutsideProject: true,
-    dry: true,
+    dangerouslyAllowCleanPatternsOutsideProject: true
 });
 ```
 
