@@ -118,7 +118,6 @@ new CleanWebpackPlugin({
     //
     // default: false
     dangerouslyAllowCleanPatternsOutsideProject: true,
-    dry: true,
 });
 ```
 
