@@ -56,6 +56,22 @@ jobs:
                       - ~/.npm
                   key: v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
             - run: npm run test.ci
+    test-node12:
+        docker:
+            - image: circleci/node:12
+        steps:
+            - checkout
+            - run: node --version > _node_version && npm --version > _npm_version && cat _node_version && cat _npm_version
+            - restore_cache:
+                  keys:
+                      - v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: node --version && npm --version
+            - run: npm install
+            - save_cache:
+                  paths:
+                      - ~/.npm
+                  key: v1-dependencies-{{ checksum "_node_version" }}-{{ checksum "_npm_version" }}
+            - run: npm run test.ci
 
 workflows:
     version: 2
@@ -64,3 +80,4 @@ workflows:
             - test-node6
             - test-node8
             - test-node10
+            - test-node12

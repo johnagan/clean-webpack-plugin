@@ -3,6 +3,9 @@ environment:
         - nodejs_version: '6'
         - nodejs_version: '8'
         - nodejs_version: '10'
+#       TODO: Uncomment and remove once appveyor supports node 12 https://github.com/appveyor/ci/issues/2921
+#        - nodejs_version: '12'
+
 install:
     - ps: Install-Product node $env:nodejs_version
     - set PATH=%APPDATA%\npm;%PATH%
