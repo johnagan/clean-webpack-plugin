@@ -1,6 +1,6 @@
-import { Configuration, Stats } from 'webpack';
 import path from 'path';
-import TempSandbox from 'temp-sandbox';
+import { Configuration, Stats } from 'webpack';
+import { TempSandbox } from 'temp-sandbox';
 import getWebpackVersion from '../dev-utils/get-webpack-version';
 
 const webpackVersion = getWebpackVersion();

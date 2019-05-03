@@ -1,6 +1,6 @@
-import { Compiler, Stats } from 'webpack';
 import path from 'path';
 import { sync as delSync } from 'del';
+import { Compiler, Stats } from 'webpack';
 
 interface Options {
     /**
