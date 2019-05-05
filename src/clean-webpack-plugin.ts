@@ -8,7 +8,7 @@ export interface Options {
      *
      * default: false
      */
-    dry: boolean;
+    dry?: boolean;
 
     /**
      * Write Logs to Console
@@ -16,21 +16,21 @@ export interface Options {
      *
      * default: false
      */
-    verbose: boolean;
+    verbose?: boolean;
 
     /**
      * Automatically remove all unused webpack assets on rebuild
      *
      * default: true
      */
-    cleanStaleWebpackAssets: boolean;
+    cleanStaleWebpackAssets?: boolean;
 
     /**
      * Do not allow removal of current webpack assets
      *
      * default: true
      */
-    protectWebpackAssets: boolean;
+    protectWebpackAssets?: boolean;
 
     /**
      * Removes files once prior to Webpack compilation
@@ -40,7 +40,7 @@ export interface Options {
      *
      * default: ['**\/*']
      */
-    cleanOnceBeforeBuildPatterns: string[];
+    cleanOnceBeforeBuildPatterns?: string[];
 
     /**
      * Removes files after every build (including watch mode) that match this pattern.
@@ -50,7 +50,7 @@ export interface Options {
      *
      * default: disabled
      */
-    cleanAfterEveryBuildPatterns: string[];
+    cleanAfterEveryBuildPatterns?: string[];
 
     /**
      * Allow clean patterns outside of process.cwd()
@@ -59,7 +59,7 @@ export interface Options {
      *
      * default: false
      */
-    dangerouslyAllowCleanPatternsOutsideProject: boolean;
+    dangerouslyAllowCleanPatternsOutsideProject?: boolean;
 }
 
 class CleanWebpackPlugin {
@@ -74,7 +74,7 @@ class CleanWebpackPlugin {
     private initialClean: boolean;
     private outputPath: string;
 
-    constructor(options: Partial<Options> = {}) {
+    constructor(options: Options = {}) {
         if (typeof options !== 'object' || Array.isArray(options) === true) {
             throw new Error(`clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
