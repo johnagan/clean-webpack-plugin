@@ -14,17 +14,6 @@ const babel = {
         ],
         '@babel/preset-typescript',
     ],
-    overrides: [
-        {
-            test: ['./src/clean-webpack-plugin.ts'],
-            plugins: [
-                [
-                    'babel-plugin-add-module-exports',
-                    { addDefaultProperty: true },
-                ],
-            ],
-        },
-    ],
 };
 
 module.exports = babel;
