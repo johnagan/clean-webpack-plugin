@@ -49,34 +49,34 @@
     "webpack": "*"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
     "@babel/preset-typescript": "^7.3.3",
     "@chrisblossom/eslint-config": "^4.0.10",
-    "@types/jest": "^24.0.9",
-    "@types/node": "^11.10.4",
+    "@types/jest": "^24.0.12",
+    "@types/node": "^12.0.0",
     "@types/read-pkg-up": "^3.0.1",
-    "@types/webpack": "^4.4.25",
-    "babel-jest": "^24.1.0",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "codecov": "^3.2.0",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "codecov": "^3.3.0",
     "cross-env": "^5.2.0",
     "del-cli": "^1.1.0",
-    "eslint": "^5.15.0",
+    "eslint": "^5.16.0",
     "execa": "^1.0.0",
-    "husky": "^1.3.1",
-    "jest": "^24.1.0",
-    "lint-staged": "^8.1.5",
+    "husky": "^2.2.0",
+    "jest": "^24.8.0",
+    "lint-staged": "^8.1.6",
     "listr": "^0.14.3",
-    "prettier": "^1.16.4",
+    "prettier": "^1.17.0",
     "read-pkg-up": "^4.0.0",
-    "semver": "^5.6.0",
-    "temp-sandbox": "^1.0.17",
-    "typescript": "^3.3.3333",
-    "webpack": "^4.29.6"
+    "semver": "^6.0.0",
+    "temp-sandbox": "^2.0.0",
+    "typescript": "^3.4.5",
+    "webpack": "^4.30.0"
   },
   "dependencies": {
-    "del": "^4.0.0"
+    "@types/webpack": "^4.4.31",
+    "del": "^4.1.1"
   }
 }
