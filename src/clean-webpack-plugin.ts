@@ -229,7 +229,8 @@ class CleanWebpackPlugin {
         /**
          * Fetch Webpack's output asset files
          */
-        const assets = stats.toJson().assets.map((asset: { name: string }) => {
+        const assets = stats.toJson().assets || [];
+        const assetList = assets.map((asset: { name: string }) => {
             return asset.name;
         });
 
@@ -239,7 +240,7 @@ class CleanWebpackPlugin {
          * (relies on del's cwd: outputPath option)
          */
         const staleFiles = this.currentAssets.filter((previousAsset) => {
-            const assetCurrent = assets.includes(previousAsset) === false;
+            const assetCurrent = assetList.includes(previousAsset) === false;
 
             return assetCurrent;
         });
@@ -247,7 +248,7 @@ class CleanWebpackPlugin {
         /**
          * Save assets for next compilation
          */
-        this.currentAssets = assets.sort();
+        this.currentAssets = assetList.sort();
 
         const removePatterns = [];
 
