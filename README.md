@@ -47,7 +47,7 @@ const webpackConfig = {
          * During rebuilds, all webpack assets that are not used anymore
          * will be removed automatically.
          *
-         * See `Options and Defaults` for for information
+         * See `Options and Defaults` for information
          */
         new CleanWebpackPlugin(),
     ],
