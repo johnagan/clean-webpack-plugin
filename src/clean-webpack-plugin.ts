@@ -48,7 +48,7 @@ export interface Options {
      *
      * Use !negative patterns to exclude files
      *
-     * default: disabled
+     * default: []
      */
     cleanAfterEveryBuildPatterns?: string[];
 
@@ -75,7 +75,7 @@ class CleanWebpackPlugin {
     private outputPath: string;
 
     constructor(options: Options = {}) {
-        if (typeof options !== 'object' || Array.isArray(options) === true) {
+        if (Object.prototype.toString.call(options) !== "[object Object]") {
             throw new Error(`clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
         }
