@@ -19,7 +19,7 @@
 
 A webpack plugin to remove/clean your build folder(s).
 
-> NOTE: Node v6+ and Webpack v2+ are supported and tested.
+> NOTE: Node v6+ and webpack v3+ are supported and tested.
 
 ## About
 

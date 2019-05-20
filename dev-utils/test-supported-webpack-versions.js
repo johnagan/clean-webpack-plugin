@@ -15,7 +15,6 @@ const ciEnabled = process.argv[process.argv.length - 1] === '--ci';
 
 const supported = [
     //
-    '2',
     '3',
     '4',
     'next',
