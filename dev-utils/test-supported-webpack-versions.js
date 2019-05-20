@@ -5,7 +5,6 @@
 'use strict';
 
 const execa = require('execa');
-const semver = require('semver');
 const Listr = require('listr');
 const del = require('del');
 const readPkgUp = require('read-pkg-up');
@@ -25,14 +24,14 @@ const webpackTestTasks = supported.map((version) => {
         /**
          * Webpack version 5 (currently @next) removed support for node 6.
          */
-        if (
-            (version === 'next' || version === '5') &&
-            semver.lte(process.version, '8.0.0') === true
-        ) {
-            return `node ${
-                process.version
-            } is not supported by webpack@${version}...node >=8 required`;
-        }
+        // if (
+        //     (version === 'next' || version === '5') &&
+        //     semver.lte(process.version, '8.0.0') === true
+        // ) {
+        //     return `node ${
+        //         process.version
+        //     } is not supported by webpack@${version}...node >=8 required`;
+        // }
 
         return false;
     };
@@ -119,12 +118,12 @@ tasks
                                 '--no-save',
                                 `webpack@${packageJsonWebpackVersion}`,
                             ],
-                            { env: { FORCE_COLOR: true } }
+                            { env: { FORCE_COLOR: true } },
                         ),
                     skip: () => ciEnabled === true,
                 },
             ],
-            listrOptions
+            listrOptions,
         ).run();
     })
     .catch((error) => {
