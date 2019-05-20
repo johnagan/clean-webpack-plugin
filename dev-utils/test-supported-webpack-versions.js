@@ -104,7 +104,7 @@ tasks
         const packageJsonWebpackVersion = readPkgUp.sync({
             cwd: process.cwd(),
             normalize: false,
-        }).pkg.devDependencies.webpack;
+        }).package.devDependencies.webpack;
 
         return new Listr(
             [
