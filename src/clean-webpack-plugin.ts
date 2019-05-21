@@ -62,6 +62,16 @@ export interface Options {
     dangerouslyAllowCleanPatternsOutsideProject?: boolean;
 }
 
+// Copied from https://github.com/sindresorhus/is-plain-obj/blob/97480673cf12145b32ec2ee924980d66572e8a86/index.js
+function isPlainObject(value: unknown): boolean {
+    if (Object.prototype.toString.call(value) !== '[object Object]') {
+        return false;
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    return prototype === null || prototype === Object.getPrototypeOf({});
+}
+
 class CleanWebpackPlugin {
     private readonly dry: boolean;
     private readonly verbose: boolean;
@@ -75,7 +85,7 @@ class CleanWebpackPlugin {
     private outputPath: string;
 
     constructor(options: Options = {}) {
-        if (Object.prototype.toString.call(options) !== "[object Object]") {
+        if (isPlainObject(options) === false) {
             throw new Error(`clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
         }

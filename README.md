@@ -109,7 +109,7 @@ new CleanWebpackPlugin({
     //
     // Use !negative patterns to exclude files
     //
-    // default: disabled
+    // default: []
     cleanAfterEveryBuildPatterns: ['static*.*', '!static1.js'],
 
     // Allow clean patterns outside of process.cwd()
