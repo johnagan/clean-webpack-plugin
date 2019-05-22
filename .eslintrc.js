@@ -2,6 +2,9 @@
 
 const eslint = {
     extends: '@chrisblossom/eslint-config',
+    rules: {
+        'import/no-default-export': 'off',
+    },
     overrides: [
         {
             files: ['dev-utils/**/*.js', 'dev-utils/**/.*.js'],

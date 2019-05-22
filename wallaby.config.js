@@ -58,11 +58,11 @@ module.exports = (wallabyInitial) => {
             const path = require('path');
             const realModules = path.join(
                 wallabySetup.localProjectDir,
-                'node_modules'
+                'node_modules',
             );
             const linkedModules = path.join(
                 wallabySetup.projectCacheDir,
-                'node_modules'
+                'node_modules',
             );
 
             try {
