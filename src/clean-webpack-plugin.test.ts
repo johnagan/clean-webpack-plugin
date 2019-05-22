@@ -1133,7 +1133,72 @@ describe('verbose option', () => {
 });
 
 describe('webpack errors', () => {
-    test('does nothing when webpack errors are present', async () => {
+    test('does nothing when webpack errors are present on initial build', async () => {
+        createSrcBundle(2);
+
+        const cleanWebpackPluginPrevious = new CleanWebpackPlugin();
+
+        const compilerPrevious = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPluginPrevious],
+        });
+
+        expect(cleanWebpackPluginPrevious.currentAssets).toEqual([]);
+
+        /**
+         * Run successful build to place files inside dist folder but not in current assets
+         */
+        await compilerPrevious.run();
+
+        const cleanWebpackPlugin = new CleanWebpackPlugin({
+            verbose: true,
+        });
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [cleanWebpackPlugin],
+        });
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        expect(consoleSpy.mock.calls).toEqual([]);
+
+        /**
+         * remove entry file to create webpack compile error
+         */
+        sandbox.deleteSync(entryFile);
+
+        try {
+            await compiler.run();
+            // eslint-disable-next-line no-empty
+        } catch (error) {}
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+
+        expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+        expect(consoleSpy.mock.calls).toEqual([
+            ['clean-webpack-plugin: pausing due to webpack errors'],
+        ]);
+    });
+
+    test('does nothing when webpack errors are present on rebuild', async () => {
         createSrcBundle(2);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({

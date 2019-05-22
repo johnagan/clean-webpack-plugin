@@ -1,6 +1,8 @@
 import path from 'path';
 import { sync as delSync } from 'del';
-import { Compiler, Stats } from 'webpack';
+import { Compiler, Stats, compilation as compilationType } from 'webpack';
+
+type Compilation = compilationType.Compilation;
 
 export interface Options {
     /**
@@ -183,12 +185,18 @@ class CleanWebpackPlugin {
 
         if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
             if (hooks) {
-                hooks.compile.tap('clean-webpack-plugin', () => {
-                    this.handleInitial();
+                hooks.emit.tap('clean-webpack-plugin', (compilation) => {
+                    this.handleInitial(compilation);
                 });
             } else {
-                compiler.plugin('compile', () => {
-                    this.handleInitial();
+                compiler.plugin('emit', (compilation, callback) => {
+                    try {
+                        this.handleInitial(compilation);
+
+                        callback();
+                    } catch (error) {
+                        callback(error);
+                    }
                 });
             }
         }
@@ -211,8 +219,18 @@ class CleanWebpackPlugin {
      *
      * Warning: It is recommended to initially clean your build directory outside of webpack to minimize unexpected behavior.
      */
-    handleInitial() {
+    handleInitial(compilation: Compilation) {
         if (this.initialClean) {
+            return;
+        }
+
+        /**
+         * Do not remove files if there are compilation errors
+         *
+         * Handle logging inside this.handleDone
+         */
+        const stats = compilation.getStats();
+        if (stats.hasErrors()) {
             return;
         }
 
