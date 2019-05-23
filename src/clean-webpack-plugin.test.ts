@@ -46,7 +46,8 @@ function webpack(options: Configuration = {}) {
 }
 
 const CleanWebpackPlugin: any = function CleanWebpackPlugin(...args: any) {
-    const CleanWebpackPluginActual = require('./clean-webpack-plugin');
+    const CleanWebpackPluginActual = require('./clean-webpack-plugin')
+        .CleanWebpackPlugin;
     const cleanWebpackPlugin = new CleanWebpackPluginActual(...args);
     return cleanWebpackPlugin;
 };

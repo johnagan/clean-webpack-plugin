@@ -347,4 +347,4 @@ class CleanWebpackPlugin {
     }
 }
 
-export default CleanWebpackPlugin;
+export { CleanWebpackPlugin };
