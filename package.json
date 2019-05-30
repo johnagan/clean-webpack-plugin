@@ -43,7 +43,8 @@
     "typescript": "tsc",
     "git-pre-commit": "lint-staged",
     "git-pre-push": "npm run lint && npm run typescript && npm run test.all",
-    "prepublishOnly": "npm run build && npm run lint && npm run typescript && npm run test.all"
+    "prepublishOnly": "npm run build && npm run lint && npm run typescript && npm run test.all",
+    "release": "np"
   },
   "peerDependencies": {
     "webpack": "*"
@@ -67,6 +68,7 @@
     "jest": "^24.8.0",
     "lint-staged": "^8.1.7",
     "listr": "^0.14.3",
+    "np": "^5.0.2",
     "prettier": "^1.17.1",
     "read-pkg-up": "^6.0.0",
     "semver": "^6.0.0",
