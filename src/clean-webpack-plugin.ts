@@ -185,11 +185,14 @@ class CleanWebpackPlugin {
 
         if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
             if (hooks) {
-                hooks.emit.tap('clean-webpack-plugin', (compilation) => {
-                    this.handleInitial(compilation);
-                });
+                hooks.afterCompile.tap(
+                    'clean-webpack-plugin',
+                    (compilation) => {
+                        this.handleInitial(compilation);
+                    },
+                );
             } else {
-                compiler.plugin('emit', (compilation, callback) => {
+                compiler.plugin('after-compile', (compilation, callback) => {
                     try {
                         this.handleInitial(compilation);
 
