@@ -176,6 +176,12 @@ class CleanWebpackPlugin {
 
         this.outputPath = compiler.options.output.path;
 
+        if (this.outputPath === process.env.PWD) {
+            throw new Error(
+                `Can't clean the main directory, please check your output.path and set it to the build directory`,
+            );
+        }
+
         /**
          * webpack 4+ comes with a new plugin system.
          *
