@@ -257,7 +257,13 @@ class CleanWebpackPlugin {
         /**
          * Fetch Webpack's output asset files
          */
-        const assets = stats.toJson().assets || [];
+        const assets =
+            stats.toJson(
+                {
+                    assets: true,
+                },
+                true,
+            ).assets || [];
         const assetList = assets.map((asset: { name: string }) => {
             return asset.name;
         });
