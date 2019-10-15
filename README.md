@@ -31,6 +31,8 @@ By default, this plugin will remove all files inside webpack's `output.path` dir
 
 `npm install --save-dev clean-webpack-plugin`
 
+If you are using [Typescript](https://www.typescriptlang.org/), you might need to install `@types/webpack` and/or `@types/webpack-env` to your `devDependencies`.
+
 ## Usage
 
 ```js
