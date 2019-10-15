@@ -88,14 +88,14 @@ class CleanWebpackPlugin {
     private outputPath: string;
     private useHooks: boolean | null;
 
-    constructor(options: Options = {}) {
+    public constructor(options: Options = {}) {
         if (isPlainObject(options) === false) {
             throw new Error(`clean-webpack-plugin only accepts an options object. See:
             https://github.com/johnagan/clean-webpack-plugin#options-and-defaults-optional`);
         }
 
         // @ts-ignore
-        if (options.allowExternal) {
+        if (options.allowExternal !== undefined) {
             throw new Error(
                 'clean-webpack-plugin: `allowExternal` option no longer supported. Use `dangerouslyAllowCleanPatternsOutsideProject`',
             );
@@ -167,8 +167,11 @@ class CleanWebpackPlugin {
         this.removeFiles = this.removeFiles.bind(this);
     }
 
-    apply(compiler: Compiler) {
-        if (!compiler.options.output || !compiler.options.output.path) {
+    public apply(compiler: Compiler): void {
+        if (
+            compiler.options.output === undefined ||
+            compiler.options.output.path === undefined
+        ) {
             // eslint-disable-next-line no-console
             console.warn(
                 'clean-webpack-plugin: options.output.path not defined. Plugin disabled...',
@@ -191,21 +194,22 @@ class CleanWebpackPlugin {
             if (this.useHooks === true) {
                 hooks.afterCompile.tapPromise(
                     'clean-webpack-plugin',
-                    this.handleInitial,
-                );
-            } else {
-                compiler.plugin(
-                    'after-compile',
-                    async (compilation, callback) => {
-                        try {
-                            await this.handleInitial(compilation);
-
-                            callback();
-                        } catch (error) {
-                            callback(error);
-                        }
+                    async (compilation) => {
+                        await this.handleInitial(compilation);
                     },
                 );
+            } else {
+                /* eslint-disable @typescript-eslint/no-floating-promises,promise/prefer-await-to-callbacks */
+                compiler.plugin('after-compile', (compilation, callback) => {
+                    try {
+                        this.handleInitial(compilation);
+
+                        callback();
+                    } catch (error) {
+                        callback(error);
+                    }
+                });
+                /* eslint-enable @typescript-eslint/no-floating-promises,promise/prefer-await-to-callbacks */
             }
         }
 
@@ -215,6 +219,7 @@ class CleanWebpackPlugin {
             });
         } else {
             compiler.plugin('done', (stats) => {
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 this.handleDone(stats);
             });
         }
@@ -227,7 +232,7 @@ class CleanWebpackPlugin {
      *
      * Warning: It is recommended to initially clean your build directory outside of webpack to minimize unexpected behavior.
      */
-    async handleInitial(compilation: Compilation) {
+    private handleInitial(compilation: Compilation) {
         if (this.initialClean) {
             return;
         }
@@ -244,13 +249,13 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        await this.removeFiles({
+        // eslint-disable-next-line consistent-return
+        return this.removeFiles({
             patterns: this.cleanOnceBeforeBuildPatterns,
-            sync: false,
         });
     }
 
-    handleDone(stats: Stats) {
+    private handleDone(stats: Stats) {
         /**
          * Do nothing if there is a webpack error
          */
@@ -269,6 +274,7 @@ class CleanWebpackPlugin {
          * Fetch Webpack's output asset files
          */
         const assets =
+            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
             stats.toJson(
                 {
                     assets: true,
@@ -294,7 +300,9 @@ class CleanWebpackPlugin {
         /**
          * Save assets for next compilation
          */
-        this.currentAssets = assetList.sort();
+        this.currentAssets = assetList.sort((a, b) => {
+            return a.localeCompare(b);
+        });
 
         const removePatterns = [];
 
@@ -314,17 +322,14 @@ class CleanWebpackPlugin {
 
         if (removePatterns.length !== 0) {
             // eslint-disable-next-line consistent-return
-            return this.removeFiles({
-                patterns: removePatterns,
-                sync: this.useHooks === false,
-            });
+            return this.removeFiles({ patterns: removePatterns });
         }
     }
 
     // eslint-disable-next-line class-methods-use-this
-    handleDelError(error: Error) {
-        const needsForce = /Cannot delete files\/directories outside the current working directory\./.test(
-            error.message,
+    private handleDelError(error: Error) {
+        const needsForce = error.message.includes(
+            'Cannot delete files/directories outside the current working directory.',
         );
 
         if (needsForce) {
@@ -336,7 +341,7 @@ class CleanWebpackPlugin {
         throw error;
     }
 
-    logResult(deleted: string[]): void {
+    private logResult(deleted: string[]): void {
         if (this.verbose === false) {
             return;
         }
@@ -359,7 +364,7 @@ class CleanWebpackPlugin {
         });
     }
 
-    removeFiles({ patterns, sync }: { patterns: string[]; sync: boolean }) {
+    private removeFiles({ patterns }: { patterns: string[] }) {
         const delOptions = {
             force: this.dangerouslyAllowCleanPatternsOutsideProject,
             // Change context to build directory
@@ -369,8 +374,8 @@ class CleanWebpackPlugin {
             ignore: this.protectWebpackAssets ? this.currentAssets : [],
         };
 
-        // webpack v3 done plugin hook cannot be async. Use sync version until webpack v3 support is dropped.
-        if (sync === true) {
+        // webpack v3 done plugin hook cannot be async.
+        if (this.useHooks === false) {
             try {
                 const deleted = del.sync(patterns, delOptions);
                 this.logResult(deleted);
@@ -379,16 +384,13 @@ class CleanWebpackPlugin {
             }
         }
 
-        return (
-            del(patterns, delOptions)
-                // eslint-disable-next-line promise/always-return
-                .then((deleted: string[]): void => {
-                    this.logResult(deleted);
-                })
-                .catch((error) => {
-                    this.handleDelError(error);
-                })
-        );
+        return del(patterns, delOptions)
+            .then((deleted: string[]): void => {
+                this.logResult(deleted);
+            })
+            .catch((error) => {
+                this.handleDelError(error);
+            });
     }
 }
 

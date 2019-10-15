@@ -11,7 +11,7 @@ test('handles undefined pkg', () => {
 });
 
 test('handles undefined engines', () => {
-    jest.doMock('read-pkg-up', () => ({ sync: () => ({ package: {} }) }));
+    jest.doMock('read-pkg-up', () => ({ sync: () => ({ packageJson: {} }) }));
 
     const nodeVersion = require('./node-version');
 
@@ -20,7 +20,7 @@ test('handles undefined engines', () => {
 
 test('handles undefined node', () => {
     jest.doMock('read-pkg-up', () => ({
-        sync: () => ({ package: { engines: { npm: '^5.0.0' } } }),
+        sync: () => ({ packageJson: { engines: { npm: '^5.0.0' } } }),
     }));
 
     const nodeVersion = require('./node-version');
@@ -30,7 +30,7 @@ test('handles undefined node', () => {
 
 test('handles non-digit characters', () => {
     jest.doMock('read-pkg-up', () => ({
-        sync: () => ({ package: { engines: { node: '>=10.0.0' } } }),
+        sync: () => ({ packageJson: { engines: { node: '>=10.0.0' } } }),
     }));
 
     const nodeVersion = require('./node-version');
@@ -40,7 +40,7 @@ test('handles non-digit characters', () => {
 
 test('handles empty node', () => {
     jest.doMock('read-pkg-up', () => ({
-        sync: () => ({ package: { engines: { node: '' } } }),
+        sync: () => ({ packageJson: { engines: { node: '' } } }),
     }));
 
     const nodeVersion = require('./node-version');

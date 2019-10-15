@@ -29,9 +29,10 @@ function webpack(options: Configuration = {}) {
 
     const compiler = webpackActual(options);
 
-    const runAsync = () =>
-        new Promise((resolve, reject) => {
+    const runAsync = async () => {
+        return new Promise((resolve, reject) => {
             compiler.run((error: Error, stats: Stats) => {
+                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
                 if (error || stats.hasErrors()) {
                     reject(error);
 
@@ -41,6 +42,7 @@ function webpack(options: Configuration = {}) {
                 resolve(stats);
             });
         });
+    };
 
     return { ...compiler, run: runAsync };
 }
@@ -95,6 +97,7 @@ function createStaticFiles() {
 let consoleSpy: any;
 
 const cwd = process.cwd();
+
 beforeEach(() => {
     process.chdir(sandbox.dir);
 
@@ -179,7 +182,7 @@ test('removes initial files by default', async () => {
 
     expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-    expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+    expect(sandbox.getFileListSync(outputPathFull)).toEqual(['dist/bundle.js']);
 });
 
 test('removes nested files', async () => {
@@ -216,8 +219,8 @@ test('removes nested files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        'js/bundle.js',
-        'js/chunks/1.bundle.js',
+        'dist/js/bundle.js',
+        'dist/js/chunks/1.bundle.js',
     ]);
 });
 
@@ -249,10 +252,10 @@ test('removes map files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        '1.bundle.js',
-        '1.bundle.js.map',
-        'bundle.js',
-        'bundle.js.map',
+        'dist/1.bundle.js',
+        'dist/1.bundle.js.map',
+        'dist/bundle.js',
+        'dist/bundle.js.map',
     ]);
 
     createSrcBundle(1);
@@ -265,8 +268,8 @@ test('removes map files', async () => {
     ]);
 
     expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-        'bundle.js',
-        'bundle.js.map',
+        'dist/bundle.js',
+        'dist/bundle.js.map',
     ]);
 });
 
@@ -305,8 +308,8 @@ describe('cleanStaleWebpackAssets option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
     });
 
@@ -343,7 +346,9 @@ describe('cleanStaleWebpackAssets option', () => {
 
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            'dist/bundle.js',
+        ]);
     });
 
     test('removes assets by default', async () => {
@@ -377,7 +382,9 @@ describe('cleanStaleWebpackAssets option', () => {
 
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            'dist/bundle.js',
+        ]);
     });
 });
 
@@ -411,8 +418,8 @@ describe('protectWebpackAssets option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -423,10 +430,10 @@ describe('protectWebpackAssets option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -458,8 +465,8 @@ describe('protectWebpackAssets option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -470,10 +477,10 @@ describe('protectWebpackAssets option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -506,7 +513,7 @@ describe('protectWebpackAssets option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
+            'dist/1.bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -517,9 +524,9 @@ describe('protectWebpackAssets option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 });
@@ -556,10 +563,10 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
 
         createSrcBundle(2);
@@ -572,11 +579,11 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            '1.bundle.js',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
 
         expect(removeFilesSpy).not.toHaveBeenCalled();
@@ -588,9 +595,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
 
         const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
         expect(initialBuildFiles).toEqual([
-            '.hidden.file',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
@@ -613,7 +620,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
 
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
-        expect(sandbox.getFileListSync(outputPathFull)).toEqual(['bundle.js']);
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            'dist/bundle.js',
+        ]);
 
         createStaticFiles();
 
@@ -622,10 +631,10 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -635,9 +644,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
 
         const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
         expect(initialBuildFiles).toEqual([
-            '.hidden.file',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
@@ -661,9 +670,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
         ]);
 
         createStaticFiles();
@@ -673,10 +682,10 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -686,9 +695,9 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
 
         const initialBuildFiles = sandbox.getFileListSync(outputPathFull);
         expect(initialBuildFiles).toEqual([
-            '.hidden.file',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
@@ -712,8 +721,8 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            'bundle.js',
-            'static2.txt',
+            'dist/bundle.js',
+            'dist/static2.txt',
         ]);
 
         createStaticFiles();
@@ -723,10 +732,10 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -737,7 +746,7 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
 
         const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
-        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+        expect(initialOutsideFiles).toEqual(['build/outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             cleanOnceBeforeBuildPatterns: [
@@ -760,7 +769,7 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         );
 
         expect(sandbox.getFileListSync(outsideDistPath)).toEqual([
-            'outside-file.js',
+            'build/outside-file.js',
         ]);
     });
 });
@@ -794,8 +803,8 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -806,9 +815,9 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
         ]);
     });
 
@@ -840,8 +849,8 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -852,10 +861,10 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -887,8 +896,8 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         createSrcBundle(1);
@@ -899,11 +908,11 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '.hidden.file',
-            '1.bundle.js',
-            'bundle.js',
-            'static1.js',
-            'static2.txt',
+            'dist/.hidden.file',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
+            'dist/static1.js',
+            'dist/static2.txt',
         ]);
     });
 
@@ -914,7 +923,7 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
 
         const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
-        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+        expect(initialOutsideFiles).toEqual(['build/outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             cleanAfterEveryBuildPatterns: [
@@ -933,6 +942,7 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         });
 
         // only tests webpack 4+ because webpack 3 does not throw errors correctly in done plugin cycle
+        // eslint-disable-next-line jest/no-if
         if (cleanWebpackPlugin.useHooks === true) {
             await expect(
                 compiler.run(),
@@ -942,7 +952,7 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         }
 
         expect(sandbox.getFileListSync(outsideDistPath)).toEqual([
-            'outside-file.js',
+            'build/outside-file.js',
         ]);
     });
 });
@@ -956,7 +966,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
 
         const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
-        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+        expect(initialOutsideFiles).toEqual(['build/outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             // Use cleanOnceBeforeBuildPatterns because webpack 2/3 doesn't handle errors in done lifecycle correctly
@@ -988,7 +998,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         sandbox.createFileSync('build/outside-file.js', '// outside-file.js');
 
         const initialOutsideFiles = sandbox.getFileListSync(outsideDistPath);
-        expect(initialOutsideFiles).toEqual(['outside-file.js']);
+        expect(initialOutsideFiles).toEqual(['build/outside-file.js']);
 
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
@@ -1015,7 +1025,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
     });
 
-    test('dangerouslyAllowCleanPatternsOutsideProject: true require dry to be explicitly set', async () => {
+    test('dangerouslyAllowCleanPatternsOutsideProject: true require dry to be explicitly set', () => {
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
         });
@@ -1031,7 +1041,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         `);
     });
 
-    test('dangerouslyAllowCleanPatternsOutsideProject: true dry: true', async () => {
+    test('dangerouslyAllowCleanPatternsOutsideProject: true dry: true', () => {
         const cleanWebpackPlugin = new CleanWebpackPlugin({
             dangerouslyAllowCleanPatternsOutsideProject: true,
             dry: true,
@@ -1080,8 +1090,8 @@ describe('dry option', () => {
         expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         expect(consoleSpy).toHaveBeenCalledWith(
@@ -1184,8 +1194,8 @@ describe('webpack errors', () => {
         });
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         expect(consoleSpy.mock.calls).toEqual([]);
@@ -1201,8 +1211,8 @@ describe('webpack errors', () => {
         } catch (error) {}
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         expect(cleanWebpackPlugin.currentAssets).toEqual([]);
@@ -1239,8 +1249,8 @@ describe('webpack errors', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
 
         expect(consoleSpy.mock.calls).toEqual([]);
@@ -1265,8 +1275,8 @@ describe('webpack errors', () => {
         ]);
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-            '1.bundle.js',
-            'bundle.js',
+            'dist/1.bundle.js',
+            'dist/bundle.js',
         ]);
     });
 
@@ -1326,7 +1336,7 @@ describe('webpack >= 4 only', () => {
             expect(cleanWebpackPlugin.currentAssets).toEqual(['main.js']);
 
             expect(sandbox.getFileListSync(outputPathFull)).toEqual([
-                'main.js',
+                'dist/main.js',
             ]);
         });
     }
