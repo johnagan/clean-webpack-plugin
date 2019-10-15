@@ -1,5 +1,6 @@
 import path from 'path';
 import del from 'del';
+import slash from 'slash';
 import { Compiler, Stats, compilation as compilationType } from 'webpack';
 
 type Compilation = compilationType.Compilation;
@@ -275,7 +276,8 @@ class CleanWebpackPlugin {
                 true,
             ).assets || [];
         const assetList = assets.map((asset: { name: string }) => {
-            return asset.name;
+            // enforce forward slashes because del's pattern matching works better with them
+            return slash(asset.name);
         });
 
         /**
@@ -321,13 +323,12 @@ class CleanWebpackPlugin {
 
     // eslint-disable-next-line class-methods-use-this
     handleDelError(error: Error) {
-        const needsForce = /Cannot delete files\/folders outside the current working directory\./.test(
+        const needsForce = /Cannot delete files\/directories outside the current working directory\./.test(
             error.message,
         );
 
         if (needsForce) {
-            const message =
-                'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `dangerouslyAllowCleanPatternsOutsideProject` option.';
+            const message = `clean-webpack-plugin: Cannot delete files/directories outside webpack's output.path. Can be overridden with the "dangerouslyAllowCleanPatternsOutsideProject" option.`;
 
             throw new Error(message);
         }

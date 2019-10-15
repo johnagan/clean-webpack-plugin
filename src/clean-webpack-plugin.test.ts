@@ -730,7 +730,7 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
         ]);
     });
 
-    test('handles the cleanOnceBeforeBuildPatterns outside of build directory', async () => {
+    test('cannot remove cleanOnceBeforeBuildPatterns outside of build directory without force', async () => {
         createSrcBundle(1);
 
         const outsideDistPath = 'build';
@@ -755,9 +755,13 @@ describe('cleanOnceBeforeBuildPatterns option', () => {
             plugins: [cleanWebpackPlugin],
         });
 
-        await compiler.run();
+        await expect(compiler.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"clean-webpack-plugin: Cannot delete files/directories outside webpack's output.path. Can be overridden with the \\"dangerouslyAllowCleanPatternsOutsideProject\\" option."`,
+        );
 
-        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
+        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([
+            'outside-file.js',
+        ]);
     });
 });
 
@@ -903,7 +907,7 @@ describe('cleanAfterEveryBuildPatterns option', () => {
         ]);
     });
 
-    test('handles the cleanAfterEveryBuildPatterns outside of webpack output directory', async () => {
+    test('cannot remove cleanAfterEveryBuildPatterns outside of webpack output directory without force', async () => {
         createSrcBundle(1);
 
         const outsideDistPath = 'build';
@@ -928,9 +932,18 @@ describe('cleanAfterEveryBuildPatterns option', () => {
             plugins: [cleanWebpackPlugin],
         });
 
-        await compiler.run();
+        // only tests webpack 4+ because webpack 3 does not throw errors correctly in done plugin cycle
+        if (cleanWebpackPlugin.useHooks === true) {
+            await expect(
+                compiler.run(),
+            ).rejects.toThrowErrorMatchingInlineSnapshot(
+                `"clean-webpack-plugin: Cannot delete files/directories outside webpack's output.path. Can be overridden with the \\"dangerouslyAllowCleanPatternsOutsideProject\\" option."`,
+            );
+        }
 
-        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([]);
+        expect(sandbox.getFileListSync(outsideDistPath)).toEqual([
+            'outside-file.js',
+        ]);
     });
 });
 
@@ -963,7 +976,7 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         });
 
         await expect(compiler.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the \`dangerouslyAllowCleanPatternsOutsideProject\` option."`,
+            `"clean-webpack-plugin: Cannot delete files/directories outside webpack's output.path. Can be overridden with the \\"dangerouslyAllowCleanPatternsOutsideProject\\" option."`,
         );
     });
 
@@ -1010,12 +1023,12 @@ describe('dangerouslyAllowCleanPatternsOutsideProject option', () => {
         expect(cleanWebpackPlugin.dry).toEqual(true);
         expect(cleanWebpackPlugin.verbose).toEqual(true);
         expect(consoleSpy.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "clean-webpack-plugin: dangerouslyAllowCleanPatternsOutsideProject requires dry: false to be explicitly set. Enabling dry mode",
-  ],
-]
-`);
+            Array [
+              Array [
+                "clean-webpack-plugin: dangerouslyAllowCleanPatternsOutsideProject requires dry: false to be explicitly set. Enabling dry mode",
+              ],
+            ]
+        `);
     });
 
     test('dangerouslyAllowCleanPatternsOutsideProject: true dry: true', async () => {
