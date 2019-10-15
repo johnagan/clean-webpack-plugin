@@ -1,5 +1,5 @@
 import path from 'path';
-import { sync as delSync } from 'del';
+import del from 'del';
 import { Compiler, Stats, compilation as compilationType } from 'webpack';
 
 type Compilation = compilationType.Compilation;
@@ -85,6 +85,7 @@ class CleanWebpackPlugin {
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
+    private useHooks: boolean | null;
 
     constructor(options: Options = {}) {
         if (isPlainObject(options) === false) {
@@ -157,6 +158,7 @@ class CleanWebpackPlugin {
         this.initialClean = false;
 
         this.outputPath = '';
+        this.useHooks = null;
 
         this.apply = this.apply.bind(this);
         this.handleInitial = this.handleInitial.bind(this);
@@ -182,31 +184,33 @@ class CleanWebpackPlugin {
          * Check for hooks in-order to support old plugin system
          */
         const hooks = compiler.hooks;
+        this.useHooks = hooks !== undefined;
 
         if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
-            if (hooks) {
-                hooks.afterCompile.tap(
+            if (this.useHooks === true) {
+                hooks.afterCompile.tapPromise(
                     'clean-webpack-plugin',
-                    (compilation) => {
-                        this.handleInitial(compilation);
-                    },
+                    this.handleInitial,
                 );
             } else {
-                compiler.plugin('after-compile', (compilation, callback) => {
-                    try {
-                        this.handleInitial(compilation);
+                compiler.plugin(
+                    'after-compile',
+                    async (compilation, callback) => {
+                        try {
+                            await this.handleInitial(compilation);
 
-                        callback();
-                    } catch (error) {
-                        callback(error);
-                    }
-                });
+                            callback();
+                        } catch (error) {
+                            callback(error);
+                        }
+                    },
+                );
             }
         }
 
-        if (hooks) {
-            hooks.done.tap('clean-webpack-plugin', (stats) => {
-                this.handleDone(stats);
+        if (this.useHooks === true) {
+            hooks.done.tapPromise('clean-webpack-plugin', async (stats) => {
+                await this.handleDone(stats);
             });
         } else {
             compiler.plugin('done', (stats) => {
@@ -222,7 +226,7 @@ class CleanWebpackPlugin {
      *
      * Warning: It is recommended to initially clean your build directory outside of webpack to minimize unexpected behavior.
      */
-    handleInitial(compilation: Compilation) {
+    async handleInitial(compilation: Compilation) {
         if (this.initialClean) {
             return;
         }
@@ -239,7 +243,10 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        this.removeFiles(this.cleanOnceBeforeBuildPatterns);
+        await this.removeFiles({
+            patterns: this.cleanOnceBeforeBuildPatterns,
+            sync: false,
+        });
     }
 
     handleDone(stats: Stats) {
@@ -304,55 +311,83 @@ class CleanWebpackPlugin {
         }
 
         if (removePatterns.length !== 0) {
-            this.removeFiles(removePatterns);
+            // eslint-disable-next-line consistent-return
+            return this.removeFiles({
+                patterns: removePatterns,
+                sync: this.useHooks === false,
+            });
         }
     }
 
-    removeFiles(patterns: string[]) {
-        try {
-            const deleted = delSync(patterns, {
-                force: this.dangerouslyAllowCleanPatternsOutsideProject,
-                // Change context to build directory
-                cwd: this.outputPath,
-                dryRun: this.dry,
-                dot: true,
-                ignore: this.protectWebpackAssets ? this.currentAssets : [],
-            });
+    // eslint-disable-next-line class-methods-use-this
+    handleDelError(error: Error) {
+        const needsForce = /Cannot delete files\/folders outside the current working directory\./.test(
+            error.message,
+        );
+
+        if (needsForce) {
+            const message =
+                'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `dangerouslyAllowCleanPatternsOutsideProject` option.';
+
+            throw new Error(message);
+        }
+
+        throw error;
+    }
+
+    logResult(deleted: string[]): void {
+        if (this.verbose === false) {
+            return;
+        }
+
+        /**
+         * Log if verbose is enabled
+         */
+        deleted.forEach((file) => {
+            const filename = path.relative(process.cwd(), file);
+
+            const message = this.dry ? 'dry' : 'removed';
 
             /**
-             * Log if verbose is enabled
+             * Use console.warn over .log
+             * https://github.com/webpack/webpack/issues/1904
+             * https://github.com/johnagan/clean-webpack-plugin/issues/11
              */
-            if (this.verbose) {
-                deleted.forEach((file) => {
-                    const filename = path.relative(process.cwd(), file);
+            // eslint-disable-next-line no-console
+            console.warn(`clean-webpack-plugin: ${message} ${filename}`);
+        });
+    }
 
-                    const message = this.dry ? 'dry' : 'removed';
+    removeFiles({ patterns, sync }: { patterns: string[]; sync: boolean }) {
+        const delOptions = {
+            force: this.dangerouslyAllowCleanPatternsOutsideProject,
+            // Change context to build directory
+            cwd: this.outputPath,
+            dryRun: this.dry,
+            dot: true,
+            ignore: this.protectWebpackAssets ? this.currentAssets : [],
+        };
 
-                    /**
-                     * Use console.warn over .log
-                     * https://github.com/webpack/webpack/issues/1904
-                     * https://github.com/johnagan/clean-webpack-plugin/issues/11
-                     */
-                    // eslint-disable-next-line no-console
-                    console.warn(
-                        `clean-webpack-plugin: ${message} ${filename}`,
-                    );
-                });
+        // webpack v3 done plugin hook cannot be async. Use sync version until webpack v3 support is dropped.
+        if (sync === true) {
+            try {
+                const deleted = del.sync(patterns, delOptions);
+                this.logResult(deleted);
+            } catch (error) {
+                this.handleDelError(error);
             }
-        } catch (error) {
-            const needsForce = /Cannot delete files\/folders outside the current working directory\./.test(
-                error.message,
-            );
-
-            if (needsForce) {
-                const message =
-                    'clean-webpack-plugin: Cannot delete files/folders outside the current working directory. Can be overridden with the `dangerouslyAllowCleanPatternsOutsideProject` option.';
-
-                throw new Error(message);
-            }
-
-            throw error;
         }
+
+        return (
+            del(patterns, delOptions)
+                // eslint-disable-next-line promise/always-return
+                .then((deleted: string[]): void => {
+                    this.logResult(deleted);
+                })
+                .catch((error) => {
+                    this.handleDelError(error);
+                })
+        );
     }
 }
 
