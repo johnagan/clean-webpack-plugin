@@ -1,5 +1,5 @@
 import path from 'path';
-import { Configuration, Stats } from 'webpack';
+import { Configuration as WpConfiguration, Stats } from 'webpack';
 import { TempSandbox } from 'temp-sandbox';
 import getWebpackVersion from '../dev-utils/get-webpack-version';
 
@@ -7,6 +7,10 @@ const webpackVersion = getWebpackVersion();
 
 const webpackMajor =
     webpackVersion !== null ? parseInt(webpackVersion.split('.')[0], 10) : null;
+
+interface Configuration extends Omit<WpConfiguration, 'mode'> {
+    mode?: 'development' | 'production' | 'none' | null;
+}
 
 function webpack(options: Configuration = {}) {
     const webpackActual = require('webpack');
