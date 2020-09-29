@@ -332,7 +332,7 @@ class CleanWebpackPlugin {
                      */
                     // eslint-disable-next-line no-console
                     console.warn(
-                        `clean-webpack-plugin: ${message} ${filename}`,
+                        `\nclean-webpack-plugin: ${message} ${filename}`,
                     );
                 });
             }
