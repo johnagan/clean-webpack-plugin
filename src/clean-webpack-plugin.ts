@@ -1,6 +1,7 @@
 import path from 'path';
 import { sync as delSync } from 'del';
 import { Compiler, Stats, compilation as compilationType } from 'webpack';
+import fs from 'fs';
 
 type Compilation = compilationType.Compilation;
 
@@ -62,6 +63,29 @@ export interface Options {
      * default: false
      */
     dangerouslyAllowCleanPatternsOutsideProject?: boolean;
+
+    preserve?: PreserveOption;
+}
+
+export interface PreserveOption {
+    maxAge: number;
+    /**
+     * default: 'cwp-stats.json'
+     */
+    filename?: string;
+    /**
+     * default: output.path
+     */
+    path?: string;
+}
+
+interface StatsSchemaItem {
+    date: string;
+    assets: string[];
+}
+
+interface StatsSchema {
+    data: StatsSchemaItem[];
 }
 
 // Copied from https://github.com/sindresorhus/is-plain-obj/blob/97480673cf12145b32ec2ee924980d66572e8a86/index.js
@@ -74,6 +98,36 @@ function isPlainObject(value: unknown): boolean {
     return prototype === null || prototype === Object.getPrototypeOf({});
 }
 
+function genDateWithAddedSeconds(dateStr: string, seconds: number): Date {
+    const date = new Date(dateStr);
+    date.setSeconds(date.getSeconds() + seconds);
+    return date;
+}
+
+function genStatsItem(assets: string[]): StatsSchemaItem {
+    return { date: new Date().toISOString(), assets };
+}
+
+function stringifyStats(stats: StatsSchema): string {
+    return JSON.stringify(stats, null, 2);
+}
+
+/**
+ * Fetch Webpack's output asset files
+ */
+function webpackStatsToAssetList(stats: Stats): string[] {
+    const assets =
+        stats.toJson(
+            {
+                assets: true,
+            },
+            true,
+        ).assets || [];
+    return assets.map((asset: { name: string }) => {
+        return asset.name;
+    });
+}
+
 class CleanWebpackPlugin {
     private readonly dry: boolean;
     private readonly verbose: boolean;
@@ -82,6 +136,11 @@ class CleanWebpackPlugin {
     private readonly cleanAfterEveryBuildPatterns: string[];
     private readonly cleanOnceBeforeBuildPatterns: string[];
     private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
+    private readonly preserve?: {
+        maxAge: number;
+        filename: string;
+        path: string;
+    };
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
@@ -121,6 +180,14 @@ class CleanWebpackPlugin {
                   false;
 
         this.verbose = this.dry === true || options.verbose === true || false;
+
+        this.preserve = options.preserve
+            ? {
+                  maxAge: options.preserve.maxAge,
+                  filename: options.preserve.filename ?? 'cwp-stats.json',
+                  path: options.preserve.path ?? process.cwd(),
+              }
+            : undefined;
 
         this.cleanStaleWebpackAssets =
             options.cleanStaleWebpackAssets === true ||
@@ -236,7 +303,45 @@ class CleanWebpackPlugin {
 
         this.initialClean = true;
 
-        this.removeFiles(this.cleanOnceBeforeBuildPatterns);
+        let assetList: string[] = [];
+
+        if (this.preserve?.maxAge) {
+            assetList = webpackStatsToAssetList(stats);
+            const fullPath = path.join(
+                this.preserve.path,
+                this.preserve.filename,
+            );
+            const currentDate = new Date();
+
+            if (fs.existsSync(fullPath)) {
+                const cwpStats: StatsSchema = require(fullPath);
+                if (cwpStats && cwpStats.data) {
+                    const currentAssets = assetList.slice();
+                    const filtered = cwpStats.data.filter((item) => {
+                        const builtDate = genDateWithAddedSeconds(
+                            item.date,
+                            this.preserve!.maxAge,
+                        );
+                        if (builtDate > currentDate) {
+                            assetList.push(...item.assets);
+                            return true;
+                        }
+                        return false;
+                    });
+                    filtered.unshift(genStatsItem(currentAssets));
+                    fs.writeFileSync(
+                        fullPath,
+                        stringifyStats({ data: filtered }),
+                    );
+                }
+            } else if (assetList.length > 0) {
+                fs.writeFileSync(
+                    fullPath,
+                    stringifyStats({ data: [genStatsItem(assetList)] }),
+                );
+            }
+        }
+        this.removeFiles(this.cleanOnceBeforeBuildPatterns, assetList.sort());
     }
 
     handleDone(stats: Stats) {
@@ -254,19 +359,7 @@ class CleanWebpackPlugin {
             return;
         }
 
-        /**
-         * Fetch Webpack's output asset files
-         */
-        const assets =
-            stats.toJson(
-                {
-                    assets: true,
-                },
-                true,
-            ).assets || [];
-        const assetList = assets.map((asset: { name: string }) => {
-            return asset.name;
-        });
+        const assetList = webpackStatsToAssetList(stats);
 
         /**
          * Get all files that were in the previous build but not the current
@@ -301,19 +394,23 @@ class CleanWebpackPlugin {
         }
 
         if (removePatterns.length !== 0) {
-            this.removeFiles(removePatterns);
+            this.removeFiles(removePatterns, this.currentAssets);
         }
     }
 
-    removeFiles(patterns: string[]) {
+    removeFiles(patterns: string[], ignore: string[] = []) {
         try {
+            const finalIgnore = this.preserve
+                ? [this.preserve.filename].concat(ignore)
+                : ignore;
+
             const deleted = delSync(patterns, {
                 force: this.dangerouslyAllowCleanPatternsOutsideProject,
                 // Change context to build directory
                 cwd: this.outputPath,
                 dryRun: this.dry,
                 dot: true,
-                ignore: this.protectWebpackAssets ? this.currentAssets : [],
+                ignore: this.protectWebpackAssets ? finalIgnore : [],
             });
 
             /**

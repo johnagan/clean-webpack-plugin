@@ -1133,6 +1133,43 @@ describe('verbose option', () => {
     });
 });
 
+describe('preserve option', () => {
+    test('does not remove files with `maxAge` set', async () => {
+        createSrcBundle(2);
+
+        const compiler = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [new CleanWebpackPlugin({ preserve: { maxAge: 10000 } })],
+        });
+
+        await compiler.run();
+
+        const compiler1 = webpack({
+            entry: entryFileFull,
+            output: {
+                path: outputPathFull,
+                filename: 'bundle.js',
+                chunkFilename: '[name].bundle.js',
+            },
+            plugins: [new CleanWebpackPlugin({ preserve: { maxAge: 10000 } })],
+        });
+
+        createSrcBundle(1);
+
+        await compiler1.run();
+
+        expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+            '1.bundle.js',
+            'bundle.js',
+        ]);
+    });
+});
+
 describe('webpack errors', () => {
     test('does nothing when webpack errors are present on initial build', async () => {
         createSrcBundle(2);
