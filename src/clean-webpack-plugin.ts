@@ -141,6 +141,7 @@ class CleanWebpackPlugin {
         filename: string;
         path: string;
     };
+
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
