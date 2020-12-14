@@ -1327,9 +1327,9 @@ describe('webpack >= 4 only', () => {
 
             const cleanWebpackPlugin = new CleanWebpackPlugin();
 
-            // @ts-ignore
             const compiler = webpack({
                 // internal test option to remove mode
+                // @ts-ignore
                 mode: null,
                 plugins: [cleanWebpackPlugin],
             });
