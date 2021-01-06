@@ -47,7 +47,7 @@
     "release": "np"
   },
   "peerDependencies": {
-    "webpack": "*"
+    "webpack": "^4"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -74,7 +74,7 @@
     "semver": "^6.0.0",
     "temp-sandbox": "^3.0.0",
     "typescript": "^3.4.5",
-    "webpack": "^4.32.0"
+    "webpack": "^5.11.1"
   },
   "dependencies": {
     "@types/webpack": "^4.4.31",

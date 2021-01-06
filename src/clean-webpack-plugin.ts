@@ -1,8 +1,6 @@
-import path from 'path';
 import { sync as delSync } from 'del';
-import { Compiler, Stats, compilation as compilationType } from 'webpack';
-
-type Compilation = compilationType.Compilation;
+import path from 'path';
+import { Compilation, Compiler, Stats } from 'webpack';
 
 export interface Options {
     /**
@@ -184,32 +182,14 @@ class CleanWebpackPlugin {
         const hooks = compiler.hooks;
 
         if (this.cleanOnceBeforeBuildPatterns.length !== 0) {
-            if (hooks) {
-                hooks.emit.tap('clean-webpack-plugin', (compilation) => {
-                    this.handleInitial(compilation);
-                });
-            } else {
-                compiler.plugin('emit', (compilation, callback) => {
-                    try {
-                        this.handleInitial(compilation);
-
-                        callback();
-                    } catch (error) {
-                        callback(error);
-                    }
-                });
-            }
-        }
-
-        if (hooks) {
-            hooks.done.tap('clean-webpack-plugin', (stats) => {
-                this.handleDone(stats);
-            });
-        } else {
-            compiler.plugin('done', (stats) => {
-                this.handleDone(stats);
+            hooks.emit.tap('clean-webpack-plugin', (compilation) => {
+                this.handleInitial(compilation);
             });
         }
+
+        hooks.done.tap('clean-webpack-plugin', (stats) => {
+            this.handleDone(stats);
+        });
     }
 
     /**
@@ -258,12 +238,9 @@ class CleanWebpackPlugin {
          * Fetch Webpack's output asset files
          */
         const assets =
-            stats.toJson(
-                {
-                    assets: true,
-                },
-                true,
-            ).assets || [];
+            stats.toJson({
+                assets: true,
+            }).assets || [];
         const assetList = assets.map((asset: { name: string }) => {
             return asset.name;
         });
