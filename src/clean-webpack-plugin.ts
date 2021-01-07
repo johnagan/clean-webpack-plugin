@@ -1,6 +1,6 @@
 import { sync as delSync } from 'del';
 import path from 'path';
-import { Compilation, Compiler, Stats } from 'webpack';
+import { AssetInfo, Compilation, Compiler, Stats } from 'webpack';
 
 export interface Options {
     /**
@@ -116,19 +116,19 @@ class CleanWebpackPlugin {
             options.dry === true || options.dry === false
                 ? options.dry
                 : this.dangerouslyAllowCleanPatternsOutsideProject === true ||
-                  false;
+                false;
 
         this.verbose = this.dry === true || options.verbose === true || false;
 
         this.cleanStaleWebpackAssets =
             options.cleanStaleWebpackAssets === true ||
-            options.cleanStaleWebpackAssets === false
+                options.cleanStaleWebpackAssets === false
                 ? options.cleanStaleWebpackAssets
                 : true;
 
         this.protectWebpackAssets =
             options.protectWebpackAssets === true ||
-            options.protectWebpackAssets === false
+                options.protectWebpackAssets === false
                 ? options.protectWebpackAssets
                 : true;
 
@@ -178,6 +178,7 @@ class CleanWebpackPlugin {
          * webpack 4+ comes with a new plugin system.
          *
          * Check for hooks in-order to support old plugin system
+         * webpack 5+ removed the old system, the check now breaks
          */
         const hooks = compiler.hooks;
 
@@ -237,11 +238,17 @@ class CleanWebpackPlugin {
         /**
          * Fetch Webpack's output asset files
          */
-        const assets =
+        const assets: AssetInfo[] =
             stats.toJson({
                 assets: true,
             }).assets || [];
-        const assetList = assets.map((asset: { name: string }) => {
+
+        const relatedAssets = assets
+            .map(p => (p.related && Array.isArray(p.related) && p.related || []) as AssetInfo[])
+            .reduce((prev, cur) => [...prev, ...cur], []);
+
+        const allAssets = [...assets, ...relatedAssets];
+        const assetList = allAssets.map(asset => {
             return asset.name;
         });
 
@@ -331,3 +338,4 @@ class CleanWebpackPlugin {
 }
 
 export { CleanWebpackPlugin };
+
