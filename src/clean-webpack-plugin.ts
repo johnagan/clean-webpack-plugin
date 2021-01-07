@@ -244,12 +244,14 @@ class CleanWebpackPlugin {
             }).assets || [];
 
         const relatedAssets = assets
-            .map((p) => {
-                return ((p.related && Array.isArray(p.related) && p.related) ||
+            .map((asset) => {
+                return ((asset.related &&
+                    Array.isArray(asset.related) &&
+                    asset.related) ||
                     []) as AssetInfo[];
             })
-            .reduce((prev, cur) => {
-                return [...prev, ...cur];
+            .reduce((allAssets, relatedAssets) => {
+                return [...allAssets, ...relatedAssets];
             }, []);
 
         const allAssets = [...assets, ...relatedAssets];
