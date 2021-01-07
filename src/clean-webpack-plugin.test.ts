@@ -1,5 +1,5 @@
 import path from 'path';
-import { Configuration, Stats } from 'webpack';
+import { Configuration as WpConfiguration, Stats } from 'webpack';
 import { TempSandbox } from 'temp-sandbox';
 import getWebpackVersion from '../dev-utils/get-webpack-version';
 
@@ -7,6 +7,10 @@ const webpackVersion = getWebpackVersion();
 
 const webpackMajor =
     webpackVersion !== null ? parseInt(webpackVersion.split('.')[0], 10) : null;
+
+interface Configuration extends Omit<WpConfiguration, 'mode'> {
+    mode?: 'development' | 'production' | 'none' | null;
+}
 
 function webpack(options: Configuration = {}) {
     const webpackActual = require('webpack');
@@ -1255,6 +1259,111 @@ describe('webpack errors', () => {
             '1.bundle.js',
             'bundle.js',
         ]);
+    });
+
+    describe('cleanOnError option', () => {
+        test('removes files on initial build when webpack errors are present', async () => {
+            createSrcBundle(2);
+
+            const cleanWebpackPluginPrevious = new CleanWebpackPlugin();
+
+            const compilerPrevious = webpack({
+                entry: entryFileFull,
+                output: {
+                    path: outputPathFull,
+                    filename: 'bundle.js',
+                    chunkFilename: '[name].bundle.js',
+                },
+                plugins: [cleanWebpackPluginPrevious],
+            });
+
+            expect(cleanWebpackPluginPrevious.currentAssets).toEqual([]);
+
+            /**
+             * Run successful build to place files inside dist folder but not in current assets
+             */
+            await compilerPrevious.run();
+
+            expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+                '1.bundle.js',
+                'bundle.js',
+            ]);
+
+            /**
+             * remove entry file to create webpack compile error
+             */
+            sandbox.deleteSync(entryFile);
+
+            const cleanWebpackPlugin = new CleanWebpackPlugin({
+                cleanOnError: true,
+            });
+
+            const compiler = webpack({
+                entry: entryFileFull,
+                output: {
+                    path: outputPathFull,
+                    filename: 'bundle.js',
+                    chunkFilename: '[name].bundle.js',
+                },
+                plugins: [cleanWebpackPlugin],
+            });
+
+            try {
+                await compiler.run();
+                // eslint-disable-next-line no-empty
+            } catch (error) {}
+
+            expect(sandbox.getFileListSync(outputPathFull)).toEqual([]);
+            expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+        });
+
+        test('removes files on rebuild when webpack errors are present', async () => {
+            createSrcBundle(2);
+
+            const cleanWebpackPlugin = new CleanWebpackPlugin({
+                cleanOnError: true,
+            });
+
+            const compiler = webpack({
+                entry: entryFileFull,
+                output: {
+                    path: outputPathFull,
+                    filename: 'bundle.js',
+                    chunkFilename: '[name].bundle.js',
+                },
+                plugins: [cleanWebpackPlugin],
+            });
+
+            expect(cleanWebpackPlugin.currentAssets).toEqual([]);
+
+            await compiler.run();
+
+            expect(cleanWebpackPlugin.currentAssets).toEqual([
+                '1.bundle.js',
+                'bundle.js',
+            ]);
+
+            expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+                '1.bundle.js',
+                'bundle.js',
+            ]);
+
+            /**
+             * remove entry file to create webpack compile error
+             */
+            sandbox.deleteSync(entryFile);
+
+            try {
+                await compiler.run();
+                // eslint-disable-next-line no-empty
+            } catch (error) {}
+
+            expect(cleanWebpackPlugin.currentAssets).toEqual(['bundle.js']);
+
+            expect(sandbox.getFileListSync(outputPathFull)).toEqual([
+                'bundle.js',
+            ]);
+        });
     });
 
     test('handles no options.output', () => {

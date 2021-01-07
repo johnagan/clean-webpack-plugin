@@ -62,6 +62,13 @@ export interface Options {
      * default: false
      */
     dangerouslyAllowCleanPatternsOutsideProject?: boolean;
+
+    /**
+     * Remove files even if there are compilation errors
+     *
+     * default: false
+     */
+    cleanOnError?: boolean;
 }
 
 // Copied from https://github.com/sindresorhus/is-plain-obj/blob/97480673cf12145b32ec2ee924980d66572e8a86/index.js
@@ -82,6 +89,7 @@ class CleanWebpackPlugin {
     private readonly cleanAfterEveryBuildPatterns: string[];
     private readonly cleanOnceBeforeBuildPatterns: string[];
     private readonly dangerouslyAllowCleanPatternsOutsideProject: boolean;
+    private readonly cleanOnError: boolean;
     private currentAssets: string[];
     private initialClean: boolean;
     private outputPath: string;
@@ -145,6 +153,8 @@ class CleanWebpackPlugin {
         )
             ? options.cleanOnceBeforeBuildPatterns
             : ['**/*'];
+
+        this.cleanOnError = options.cleanOnError === true || false;
 
         /**
          * Store webpack build assets
@@ -225,12 +235,13 @@ class CleanWebpackPlugin {
         }
 
         /**
-         * Do not remove files if there are compilation errors
+         * Do not remove files if there are compilation errors and cleanOnError
+         * is false.
          *
          * Handle logging inside this.handleDone
          */
         const stats = compilation.getStats();
-        if (stats.hasErrors()) {
+        if (stats.hasErrors() && !this.cleanOnError) {
             return;
         }
 
@@ -241,9 +252,9 @@ class CleanWebpackPlugin {
 
     handleDone(stats: Stats) {
         /**
-         * Do nothing if there is a webpack error
+         * Do nothing if there is a webpack error and cleanOnError is false.
          */
-        if (stats.hasErrors()) {
+        if (stats.hasErrors() && !this.cleanOnError) {
             if (this.verbose) {
                 // eslint-disable-next-line no-console
                 console.warn(
