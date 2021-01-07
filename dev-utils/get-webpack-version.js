@@ -9,10 +9,11 @@ function getWebpackVersion() {
     const webpackPath = require.resolve('webpack');
     const { dir } = path.parse(webpackPath);
 
-    const webpackPackageJson = readPkgUp.sync({ cwd: dir, normalize: false });
+    const webpackPackageJson =
+        readPkgUp.sync({ cwd: dir, normalize: false }) || {};
 
-    const version = webpackPackageJson.package.version
-        ? webpackPackageJson.package.version
+    const version = webpackPackageJson.packageJson.version
+        ? webpackPackageJson.packageJson.version
         : null;
 
     return version;

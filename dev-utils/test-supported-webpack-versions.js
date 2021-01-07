@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-/* eslint-disable arrow-body-style,no-param-reassign,promise/always-return */
+/* eslint-disable no-param-reassign,no-console */
 
 'use strict';
 
@@ -40,10 +40,10 @@ const webpackTestTasks = supported.map((version) => {
     const npmInstallTaskTitle = `npm ${npmCommandArgs.join(' ')}`;
     const npmInstallTask = {
         title: npmInstallTaskTitle,
-        task: (ctx, task) =>
-            execa('npm', npmCommandArgs).then(() => {
-                task.title = `${npmInstallTaskTitle} (${getWebpackVersion()})`;
-            }),
+        task: async (ctx, task) => {
+            await execa('npm', npmCommandArgs);
+            task.title = `${npmInstallTaskTitle} (${getWebpackVersion()})`;
+        },
     };
 
     const jestCommandArgs =
@@ -69,13 +69,13 @@ const webpackTestTasks = supported.map((version) => {
     if (ciEnabled === true) {
         const codecovTask = {
             title: 'codecov',
-            task: () =>
-                execa('codecov', [], {
+            task: async () => {
+                const { stdout } = await execa('codecov', [], {
                     env: { FORCE_COLOR: true },
-                }).then(({ stdout }) => {
-                    // eslint-disable-next-line no-console
-                    console.log(stdout);
-                }),
+                });
+
+                console.log(stdout);
+            },
         };
 
         testWebpackVersionTask.push(codecovTask);
@@ -83,7 +83,9 @@ const webpackTestTasks = supported.map((version) => {
 
     return {
         title: `webpack@${version}`,
-        task: () => new Listr(testWebpackVersionTask),
+        task: () => {
+            return new Listr(testWebpackVersionTask);
+        },
         skip,
     };
 });
@@ -104,14 +106,14 @@ tasks
         const packageJsonWebpackVersion = readPkgUp.sync({
             cwd: process.cwd(),
             normalize: false,
-        }).package.devDependencies.webpack;
+        }).packageJson.devDependencies.webpack;
 
         return new Listr(
             [
                 {
                     title: `npm install --no-save webpack@${packageJsonWebpackVersion}`,
-                    task: () =>
-                        execa(
+                    task: () => {
+                        return execa(
                             'npm',
                             [
                                 'install',
@@ -119,15 +121,17 @@ tasks
                                 `webpack@${packageJsonWebpackVersion}`,
                             ],
                             { env: { FORCE_COLOR: true } },
-                        ),
-                    skip: () => ciEnabled === true,
+                        );
+                    },
+                    skip: () => {
+                        return ciEnabled === true;
+                    },
                 },
             ],
             listrOptions,
         ).run();
     })
     .catch((error) => {
-        // eslint-disable-next-line no-console
         console.error(error.message);
 
         // eslint-disable-next-line no-process-exit
