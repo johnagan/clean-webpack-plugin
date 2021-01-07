@@ -47,7 +47,7 @@
     "release": "np"
   },
   "peerDependencies": {
-    "webpack": "^5"
+    "webpack": ">=4.0.0 <6.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
