@@ -250,8 +250,8 @@ class CleanWebpackPlugin {
                     asset.related) ||
                     []) as AssetInfo[];
             })
-            .reduce((allAssets, relatedAssets) => {
-                return [...allAssets, ...relatedAssets];
+            .reduce((previousAssets, currentAssets) => {
+                return [...previousAssets, ...currentAssets];
             }, []);
 
         const allAssets = [...assets, ...relatedAssets];
