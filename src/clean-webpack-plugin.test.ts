@@ -1194,7 +1194,7 @@ describe('webpack errors', () => {
         try {
             await compiler.run();
             // eslint-disable-next-line no-empty
-        } catch (error) { }
+        } catch (error) {}
 
         expect(sandbox.getFileListSync(outputPathFull)).toEqual([
             '1.bundle.js',
@@ -1249,7 +1249,7 @@ describe('webpack errors', () => {
         try {
             await compiler.run();
             // eslint-disable-next-line no-empty
-        } catch (error) { }
+        } catch (error) {}
 
         expect(consoleSpy.mock.calls).toEqual([
             ['clean-webpack-plugin: pausing due to webpack errors'],

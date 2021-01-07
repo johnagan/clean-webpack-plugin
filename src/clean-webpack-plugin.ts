@@ -116,19 +116,19 @@ class CleanWebpackPlugin {
             options.dry === true || options.dry === false
                 ? options.dry
                 : this.dangerouslyAllowCleanPatternsOutsideProject === true ||
-                false;
+                  false;
 
         this.verbose = this.dry === true || options.verbose === true || false;
 
         this.cleanStaleWebpackAssets =
             options.cleanStaleWebpackAssets === true ||
-                options.cleanStaleWebpackAssets === false
+            options.cleanStaleWebpackAssets === false
                 ? options.cleanStaleWebpackAssets
                 : true;
 
         this.protectWebpackAssets =
             options.protectWebpackAssets === true ||
-                options.protectWebpackAssets === false
+            options.protectWebpackAssets === false
                 ? options.protectWebpackAssets
                 : true;
 
@@ -244,11 +244,16 @@ class CleanWebpackPlugin {
             }).assets || [];
 
         const relatedAssets = assets
-            .map(p => (p.related && Array.isArray(p.related) && p.related || []) as AssetInfo[])
-            .reduce((prev, cur) => [...prev, ...cur], []);
+            .map((p) => {
+                return ((p.related && Array.isArray(p.related) && p.related) ||
+                    []) as AssetInfo[];
+            })
+            .reduce((prev, cur) => {
+                return [...prev, ...cur];
+            }, []);
 
         const allAssets = [...assets, ...relatedAssets];
-        const assetList = allAssets.map(asset => {
+        const assetList = allAssets.map((asset) => {
             return asset.name;
         });
 
@@ -338,4 +343,3 @@ class CleanWebpackPlugin {
 }
 
 export { CleanWebpackPlugin };
-
