@@ -1,6 +1,6 @@
 import { sync as delSync } from 'del';
 import path from 'path';
-import { AssetInfo, Compilation, Compiler, Stats } from 'webpack';
+import { Compilation, Compiler, Stats } from 'webpack';
 
 export interface Options {
     /**
@@ -238,17 +238,19 @@ class CleanWebpackPlugin {
         /**
          * Fetch Webpack's output asset files
          */
-        const assets: AssetInfo[] =
+        const assets =
             stats.toJson({
                 assets: true,
             }).assets || [];
 
         const relatedAssets = assets
             .map((asset) => {
-                return ((asset.related &&
-                    Array.isArray(asset.related) &&
-                    asset.related) ||
-                    []) as AssetInfo[];
+                return (
+                    (asset.related &&
+                        Array.isArray(asset.related) &&
+                        asset.related) ||
+                    []
+                );
             })
             .reduce((previousAssets, currentAssets) => {
                 return [...previousAssets, ...currentAssets];
