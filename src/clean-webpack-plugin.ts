@@ -238,28 +238,7 @@ class CleanWebpackPlugin {
         /**
          * Fetch Webpack's output asset files
          */
-        const assets =
-            stats.toJson({
-                assets: true,
-            }).assets || [];
-
-        const relatedAssets = assets
-            .map((asset) => {
-                return (
-                    (asset.related &&
-                        Array.isArray(asset.related) &&
-                        asset.related) ||
-                    []
-                );
-            })
-            .reduce((previousAssets, currentAssets) => {
-                return [...previousAssets, ...currentAssets];
-            }, []);
-
-        const allAssets = [...assets, ...relatedAssets];
-        const assetList = allAssets.map((asset) => {
-            return asset.name;
-        });
+        const assetList = Object.keys(stats.compilation.assets);
 
         /**
          * Get all files that were in the previous build but not the current
@@ -341,6 +320,7 @@ class CleanWebpackPlugin {
                 throw new Error(message);
             }
 
+            /* istanbul ignore next */
             throw error;
         }
     }
