@@ -7,7 +7,7 @@ test('handles undefined pkg', () => {
 
     const nodeVersion = require('./node-version');
 
-    expect(nodeVersion).toEqual('8.9.0');
+    expect(nodeVersion).toEqual('10.0.0');
 });
 
 test('handles undefined engines', () => {
@@ -15,7 +15,7 @@ test('handles undefined engines', () => {
 
     const nodeVersion = require('./node-version');
 
-    expect(nodeVersion).toEqual('8.9.0');
+    expect(nodeVersion).toEqual('10.0.0');
 });
 
 test('handles undefined node', () => {
@@ -25,7 +25,7 @@ test('handles undefined node', () => {
 
     const nodeVersion = require('./node-version');
 
-    expect(nodeVersion).toEqual('8.9.0');
+    expect(nodeVersion).toEqual('10.0.0');
 });
 
 test('handles non-digit characters', () => {
@@ -45,5 +45,5 @@ test('handles empty node', () => {
 
     const nodeVersion = require('./node-version');
 
-    expect(nodeVersion).toEqual('8.9.0');
+    expect(nodeVersion).toEqual('10.0.0');
 });

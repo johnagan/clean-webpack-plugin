@@ -19,7 +19,7 @@
 
 A webpack plugin to remove/clean your build folder(s).
 
-> NOTE: Node v8+ and webpack v3+ are supported and tested.
+> NOTE: Node v10+ and webpack v4+ are supported and tested.
 
 ## About
 
@@ -101,7 +101,11 @@ new CleanWebpackPlugin({
     // Use !negative patterns to exclude files
     //
     // default: ['**/*']
-    cleanOnceBeforeBuildPatterns: ['**/*', '!static-files*', '!directoryToExclude/**'],
+    cleanOnceBeforeBuildPatterns: [
+        '**/*',
+        '!static-files*',
+        '!directoryToExclude/**',
+    ],
     cleanOnceBeforeBuildPatterns: [], // disables cleanOnceBeforeBuildPatterns
 
     // Removes files after every build (including watch mode) that match this pattern.

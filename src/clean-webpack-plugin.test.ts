@@ -1,6 +1,6 @@
 import path from 'path';
-import { Configuration, Stats } from 'webpack';
 import { TempSandbox } from 'temp-sandbox';
+import { Compiler, Configuration, Stats } from 'webpack';
 import getWebpackVersion from '../dev-utils/get-webpack-version';
 
 const webpackVersion = getWebpackVersion();
@@ -8,7 +8,15 @@ const webpackVersion = getWebpackVersion();
 const webpackMajor =
     webpackVersion !== null ? parseInt(webpackVersion.split('.')[0], 10) : null;
 
-function webpack(options: Configuration = {}) {
+type TestConfiguration = Omit<Configuration, 'mode'> & {
+    mode?: Configuration['mode'] | null;
+};
+
+type TestCompiler = Omit<Compiler, 'run'> & {
+    run: () => Promise<unknown>;
+};
+
+function webpack(options: TestConfiguration = {}): TestCompiler {
     const webpackActual = require('webpack');
 
     // https://webpack.js.org/concepts/mode/
@@ -227,6 +235,7 @@ test('removes map files', async () => {
     const cleanWebpackPlugin = new CleanWebpackPlugin();
 
     const compiler = webpack({
+        mode: 'development',
         entry: entryFileFull,
         output: {
             path: outputPathFull,
@@ -1282,8 +1291,8 @@ describe('webpack errors', () => {
     });
 });
 
-describe('webpack >= 4 only', () => {
-    if (webpackMajor !== null && webpackMajor >= 4) {
+describe('webpack == 4 only', () => {
+    if (webpackMajor !== null && webpackMajor === 4) {
         test('works without config', async () => {
             createSrcBundle(2);
             createStaticFiles();

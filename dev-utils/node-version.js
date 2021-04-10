@@ -7,7 +7,7 @@ function getNodeVersion() {
     const packageJson =
         readPkgUp.sync({ cwd: process.cwd(), normalize: false }).package || {};
     const engines = packageJson.engines || {};
-    const node = engines.node || '8.9.0';
+    const node = engines.node || '10.0.0';
 
     const nodeVersion = semver.coerce(node).raw;
 
