@@ -101,7 +101,7 @@ new CleanWebpackPlugin({
     // Use !negative patterns to exclude files
     //
     // default: ['**/*']
-    cleanOnceBeforeBuildPatterns: ['**/*', '!static-files*'],
+    cleanOnceBeforeBuildPatterns: ['**/*', '!static-files*', '!directoryToExclude/**'],
     cleanOnceBeforeBuildPatterns: [], // disables cleanOnceBeforeBuildPatterns
 
     // Removes files after every build (including watch mode) that match this pattern.
