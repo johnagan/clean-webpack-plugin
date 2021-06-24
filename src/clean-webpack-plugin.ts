@@ -226,6 +226,10 @@ class CleanWebpackPlugin {
          */
         if (stats.hasErrors()) {
             if (this.verbose) {
+                console.error(stats.toString({
+                    chunks: false,  // Makes the build much quieter
+                    colors: true    // Shows colors in the console
+                }));
                 // eslint-disable-next-line no-console
                 console.warn(
                     'clean-webpack-plugin: pausing due to webpack errors',
