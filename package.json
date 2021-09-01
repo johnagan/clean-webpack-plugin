@@ -1,6 +1,6 @@
 {
   "name": "clean-webpack-plugin",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0",
   "author": "John Agan <johnagan@gmail.com>",
   "description": "A webpack plugin to remove/clean your build folder(s).",
   "homepage": "https://github.com/johnagan/clean-webpack-plugin",
