@@ -16,6 +16,8 @@
 [appveyor-image]: https://img.shields.io/appveyor/ci/johnagan/clean-webpack-plugin/master.svg?label=windows%20build
 [coveralls-url]: https://codecov.io/gh/johnagan/clean-webpack-plugin/branch/master
 [coveralls-image]: https://img.shields.io/codecov/c/github/johnagan/clean-webpack-plugin/master.svg
+[webpack-multiple-targets]: https://webpack.js.org/concepts/targets/#multiple-targets
+[webpack-multiple-targets-thread]: https://stackoverflow.com/questions/55826856/how-to-build-for-multiple-targets-with-webpack/55827645#55827645
 
 A webpack plugin to remove/clean your build folder(s).
 
@@ -159,3 +161,7 @@ module.exports = {
     ],
 };
 ```
+
+## Not Compatible with Multiple Targets
+
+You cannot use this plugin with webpack's [multiple targets][webpack-multiple-targets], because whenever a new target is built, the cleaner will get rid of the previous target. Check out this StackOverflow [thread][webpack-multiple-targets-thread] for more details.
